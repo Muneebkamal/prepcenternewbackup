@@ -7,6 +7,7 @@ use App\Models\PackingTemplate;
 use App\Models\Products;
 use App\Models\SystemOption;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -1144,5 +1145,32 @@ class ProductsController extends Controller
         $exists = Products::where('fnsku', $fnsku)->exists(); // adapt table/column if needed
 
         return response()->json(['exists' => $exists]);
+    }
+    public function delteDuplaicateProduct(){
+        // Step 1: Find duplicate ASINs (excluding blank and dummy ones)
+        $duplicateAsins = DB::table('products')
+        ->select('asin')  
+        ->whereNotNull('asin')
+        ->where('asin', '!=', '')
+        ->where('asin', '!=', '0000000000')
+        ->whereNull('deleted_at')
+        ->groupBy('asin')
+        ->havingRaw('COUNT(*) > 1')
+        ->pluck('asin');
+        dd( $duplicateAsins);
+        //Step 2: For each duplicate ASIN, soft delete the oldest one
+        foreach ($duplicateAsins as $asin) {
+            $oldestProduct = DB::table('products')
+            ->where('asin', $asin)
+            ->whereNull('deleted_at')
+            ->orderBy('created_at', 'asc') // or orderBy('id', 'asc') if no timestamps
+            ->first();
+
+            if ($oldestProduct) {
+                DB::table('products')
+                ->where('id', $oldestProduct->id)
+                ->update(['deleted_at' => Carbon::now()]);
+            }
+        }
     }
 }

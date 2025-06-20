@@ -144,6 +144,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/packing-template/{id}', [ProductsController::class, 'destroyTemplate']);
     Route::get('/update-product-id', [DailyInputController::class, 'updatePRoductId'])->name('updatePRoductId');
     Route::post('/check-temp-fnsku', [ProductsController::class, 'checkTempFnsku'])->name('check-temp-fnsku');
+    Route::get('/delteDuplaicateProduct', [ProductsController::class, 'delteDuplaicateProduct'])->name('delteDuplaicateProduct');
 
     
 
