@@ -145,6 +145,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/update-product-id', [DailyInputController::class, 'updatePRoductId'])->name('updatePRoductId');
     Route::post('/check-temp-fnsku', [ProductsController::class, 'checkTempFnsku'])->name('check-temp-fnsku');
     Route::get('/delteDuplaicateProduct', [ProductsController::class, 'delteDuplaicateProduct'])->name('delteDuplaicateProduct');
+    Route::post('/update-prep-order-name', [PrepOrderController::class, 'updateName'])->name('updateName');
 
     
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyInputDetail;
 use App\Models\PackingTemplate;
+use App\Models\PrepOrder;
 use App\Models\Products;
 use App\Models\SystemOption;
 use Barryvdh\DomPDF\Facade\Pdf;

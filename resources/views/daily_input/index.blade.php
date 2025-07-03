@@ -219,7 +219,9 @@
                                 <thead>
                                     <tr>
                                         <th data-ordering="false">No</th>
+                                        <th>Asin/Item ID</th>
                                         <th>FNSKU/GTIN</th>
+                                        <th>Msku/Sku</th>
                                         <th>Product Item Name</th>
                                         <th>Pack</th>
                                         <th>QTY</th>
@@ -391,11 +393,19 @@
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>
-                                    ${link !== '#' ? `<a href="${link}" target="_blank">${detail.product.fnsku} <i class="ri-external-link-line text-primary fs-4"></i></a>` : (detail.product.fnsku || '--')}
+                                    ${link !== '#' ? `<a href="${link}" target="_blank">${detail.product.asin} <i class="ri-external-link-line text-primary fs-4"></i></a>` : (detail.product.asin || '--')}
                                     <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('${detail.product.asin}')" title="Copy ASIN"></i>
                                 </td>
                                 <td>
-                                    ${detail.product ? `<div class="truncate"> <a data-toggle="tooltip" title="${detail.product.item}" href="/products/${detail.fnsku}/edit" target="_blank">${detail.product.item}</a></div` : '--'}
+                                    ${detail.product.fnsku}
+                                    <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('${detail.product.fnsku}')" title="Copy Fnsku"></i>
+                                </td>
+                                <td>
+                                    ${detail.product.msku}
+                                    <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('${detail.product.msku}')" title="Copy Msku"></i>
+                                </td>
+                                <td>
+                                    ${detail.product ? `<div class="truncate"> <a data-toggle="tooltip" title="${detail.product.item}" href="/products/show/${detail.product.id}/edit" target="_blank">${detail.product.item}</a></div` : '--'}
                                 </td>
                                 <td>${detail.pack || '--'}</td>
                                 <td>${detail.qty || '0'}</td>

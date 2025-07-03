@@ -178,7 +178,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th data-ordering="false">No</th>
+                                <th>Asin/Item Id</th>
                                 <th>FNSKU/GTIN</th>
+                                <th>Msku/Sku</th>
                                 <th>Product Item Name</th>
                                 <th>Msku/Sku</th>
                                 <th>Pack</th>
@@ -195,7 +197,7 @@
                                  <td>{{ $index +1 }}</td>
                                 <td> 
                                     @php 
-                                        $firstChar = $detail->fnsku[0];
+                                        $firstChar = $detail->product->fnsku[0];
                                         if ($firstChar === 'X') {
                                             $link = "https://www.amazon.com/dp/{$detail->product->asin}";
                                         } elseif ($firstChar === '0' || $firstChar === '1') {
@@ -205,12 +207,20 @@
                                         }
                                     @endphp
                                     
-                                    <a href="{{ $link }}" target="_blank">{{ $detail->product->fnsku }} <i class="ri-external-link-line text-primary fs-4"></i>
+                                    <a href="{{ $link }}" target="_blank">{{ $detail->product->asin }} <i class="ri-external-link-line text-primary fs-4"></i>
                                     </a>
                                     <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->asin }}')" title="Copy ASIN"></i> 
                                     
                                 </td>
-                                <td><div class="truncate"> <a href="{{ route('products.show',$detail->fnsku) }}"target="_blank" data-toggle="tooltip" title="{{ $detail->product->item }}">{{ $detail->product != null?$detail->product->item:'--' }} </a> </div></td>
+                                <td>
+                                  {{ $detail->product->fnsku }} <i class="ri-external-link-line text-primary fs-4">
+                                    <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->fnsku }}')" title="Copy Fnsku"></i> 
+                                </td>
+                                <td>
+                                    {{ $detail->product->msku }} <i class="ri-external-link-line text-primary fs-4">
+                                    <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->msku }}')" title="Copy Msku"></i> 
+                                </td>
+                                <td><div class="truncate"> <a href="{{ route('products.show',$detail->product->id) }}"target="_blank" data-toggle="tooltip" title="{{ $detail->product->item }}">{{ $detail->product != null?$detail->product->item:'--' }} </a> </div></td>
                                  <td>{{ $detail->product->msku }}</td>
                                 <td>{{ $detail->pack }}</td>
                                 <td>{{ $detail->qty }}</td>

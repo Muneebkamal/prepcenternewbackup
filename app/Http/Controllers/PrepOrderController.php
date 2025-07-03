@@ -349,6 +349,7 @@ class PrepOrderController extends Controller
             $new_daily_input_detail = new DailyInputDetail;
             $new_daily_input_detail->daily_input_id = $new_daily_input->id;
             $new_daily_input_detail->fnsku = $product->fnsku;
+            $new_daily_input_detail->product_id = $product->id;
             $new_daily_input_detail->qty = $total_qty;
             $new_daily_input_detail->pack = $product->pack;
             $new_daily_input_detail->save();
@@ -361,6 +362,7 @@ class PrepOrderController extends Controller
                 $new_daily_input_detail = new DailyInputDetail;
                 $new_daily_input_detail->daily_input_id = $daily_input->id;
                 $new_daily_input_detail->fnsku = $product->fnsku;
+                $new_daily_input_detail->product_id = $product->id;
                 $new_daily_input_detail->qty = $total_qty;
                 $new_daily_input_detail->pack = $product->pack;
                 $new_daily_input_detail->save();
@@ -469,5 +471,13 @@ class PrepOrderController extends Controller
             'status' => true,
             'message' => 'Product Added to Prep Work Order',
         ]);
+    }
+    public function updateName(Request $request){
+        $findPreOrder = PrepOrder::where('custom_id',$request->order_id)->first();
+        if($findPreOrder){
+           $findPreOrder->name = $request->name;
+            $findPreOrder->save();
+            return response()->json(['status' => 'success', 'message' => 'Name updated successfully']);
+        }
     }
 }

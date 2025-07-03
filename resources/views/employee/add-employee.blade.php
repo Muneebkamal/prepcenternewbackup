@@ -176,7 +176,10 @@
 
                                 <input type="checkbox" class="form-check-input" name="permissions[]" value="system_setting">
                                 <label class="form-check-label" for="">System Setting</label><br>
-                                
+                                <input type="checkbox" class="form-check-input" name="permissions[]" value="prep_order">
+                                <label class="form-check-label" for="">Prep Work Order List</label><br>
+                                <input type="checkbox" class="form-check-input" name="permissions[]" value="expense_manage">
+                                <label class="form-check-label" for="">Expense Managment</label><br>
                                 @error('permission')
                                 <div class="invalid-feedback">
                                     {{ $message }}

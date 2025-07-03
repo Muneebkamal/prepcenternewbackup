@@ -42,9 +42,24 @@
 @section('content')
 <div class="container-fluid">
     <div class="row d-flex align-items-center">
-        <div class="col-md-5">
+        <div class="col-md-6">
             <div class="d-flex">
-                <h1 class="mb-3">Edit Prep Work Order - {{ $order_id }}</h1>
+                <h1 class="mb-3">
+                    Edit Prep Work Order - {{ $order_id }}
+                    @php
+                        $displayName = $daily_input->name ?? ''; // Adjust as per your model
+                    @endphp
+                    <span id="display-name" class="ms-2 {{ $displayName ? '' : 'text-muted' }}">
+                        {{ $displayName ? '- ' . $displayName : '- Name' }}
+                        <button class="btn btn-primary btn-sm" style="cursor:pointer;" onclick="editName()">Edit</button>
+                    </span>
+
+                    <span id="edit-name-wrapper" class="d-none" >
+                        <input type="text" style="display: inline;"  id="name-input" class="form-control d-inline w-auto" value="{{ $displayName }}" />
+                        <button  style="display: inline;" type="button" class="btn btn-sm mt-2 btn-primary ms-2 d-inline " onclick="saveName()">Save</button>
+                    </span>
+                </h1>
+
                 <div class="ms-3">
                     @if($daily_input->status == 1)
                         <span class="badge badge-active">Completed</span>
@@ -57,7 +72,7 @@
         <div class="col-md-3">
             <h2 class="float-left">Total Products: <span id="productCount">0</span></h2>
         </div>
-        <div class="col-md-4 text-end">
+        <div class="col-md-3 text-end">
             <h6>Created By: {{ $daily_input->createdBy->name }}</h6>
             <h6>Created At: {{ $daily_input->createdBy->created_at }}</h6>
         </div>
@@ -68,7 +83,7 @@
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="productSelect" class="form-label">Search Products</label>
-                <select id="productSelect" name="product_id" class="form-select" multiple style="width: 100%;"></select>
+                <select id="productSelect" name="product_id" class="form-select select2"  multiple style="width: 100%;"></select>
             </div>
 
             <div class="col-md-4">
@@ -663,8 +678,10 @@
 
         // Initialize the product search select box using Select2
         $('#productSelect').select2({
-            placeholder: 'Select Detail',
-            multiple: false,
+            placeholder: 'Select products',
+            allowClear: true,
+            width: '100%',
+            multiple: true,
             ajax: {
                 url: '/fetch-items',
                 type: 'GET',
@@ -1039,6 +1056,38 @@
     }
 
 
-    
+    function editName() {
+        $('#display-name').addClass('d-none')
+        $('#edit-name-wrapper').removeClass('d-none')
+        
+    }
+
+    function saveName() {
+        const newName = document.getElementById('name-input').value;
+        
+        // Option 1: AJAX Save (recommended for smooth UX)
+        $.ajax({
+            url:`{{ url('update-prep-order-name') }}`,
+            method:"POST",
+            headers: {
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            },
+            data: {
+                order_id: order_id, // Pass the order ID
+                name: newName
+            },
+            success :function(data){
+                if (data.status =='success') {
+                    $('#display-name').removeClass('d-none');
+                    $('#edit-name-wrapper').addClass('d-none');
+                    $('#display-name').html(`${newName} <button class="btn btn-primary btn-sm" style="cursor:pointer;" onclick="editName()">Edit</button>`);
+                } else {
+                    alert("Failed to update name.");
+                }
+            }
+        })
+       
+    }
+
 </script>
 @endsection

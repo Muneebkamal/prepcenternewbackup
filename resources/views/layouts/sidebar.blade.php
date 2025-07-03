@@ -124,11 +124,13 @@
                         </li>
                     @endif
                     <!--<li class="menu-title"><span data-key="t-menu">Prep Work Order</span></li>-->
+                    @if($user && in_array('prep_order', $permissions))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('prep-orders.index') ? 'active' : '' }}" href="{{ route('prep-orders.index') }}">
                             <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Prep Work Order List</span>
                         </a>
                     </li>
+                    @endif
                     {{-- <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('prep-orders-create') ? 'active' : '' }}" href="{{ route('prep-orders.create') }}">
                             <i class="las la-calendar"></i> <span data-key="t-widgets">Prep Work Orders</span>
@@ -154,6 +156,7 @@
                     <!--        </ul>-->
                     <!--    </div>-->
                     <!--</li>-->
+                    @if($user && in_array('expense_manage', $permissions))
                     <li class="nav-item">
                         <a class="nav-link menu-link collapsed" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('categories.*', 'expenses.*') ? 'true' : 'false' }}" aria-controls="sidebarDashboards" {{ request()->routeIs('categories.*', 'expenses.*') ? 'active' : '' }}>
                             <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Expense Managment</span>
@@ -169,6 +172,7 @@
                             </ul>
                         </div>
                     </li>
+                    @endif
                         
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf

@@ -190,6 +190,12 @@
                                 <input type="checkbox" class="form-check-input" name="permissions[]" value="system_setting"
                                 @if(in_array('system_setting', $permissions)) checked @endif>
                                 <label class="form-check-label" for="">System Setting</label><br>
+                                <input type="checkbox" class="form-check-input" name="permissions[]" value="prep_order"
+                                @if(in_array('prep_order', $permissions)) checked @endif>
+                                <label class="form-check-label" for="">Prep Work Order List</label><br>
+                                <input type="checkbox" class="form-check-input" name="permissions[]" value="expense_manage"
+                                @if(in_array('expense_manage', $permissions)) checked @endif>
+                                <label class="form-check-label" for="">Expense Managment</label><br>
                                 @error('permission')
                                 <div class="invalid-feedback">
                                     {{ $message }}

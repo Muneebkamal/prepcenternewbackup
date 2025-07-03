@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PrepOrder extends Model
 {
     use HasFactory;
-    protected $fillable = ['custom_id', 'employee_id', 'date', 'start_time', 'end_time'];
+    protected $fillable = ['custom_id', 'employee_id', 'date', 'start_time', 'end_time','name'];
 
     // Relationship with Employee
     public function employee()

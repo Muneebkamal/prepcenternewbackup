@@ -243,7 +243,7 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-box-seam"></i> Item Name
                                     </span>
-                                    <input type="text" id="item" name="item" class="form-control" >
+                                    <input type="text" id="item" name="item" class="form-control" required  >
                                 </div>
                             </div>
                             <div class="col-md-6 mt-2">
@@ -269,7 +269,7 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-upc-scan"></i> ASIN / ITEM ID
                                     </span>
-                                    <input type="text" id="asin" name="asin" class="form-control" >
+                                    <input type="text" id="asin" name="asin" class="form-control" required>
                                 </div>
                             </div>
                         
@@ -298,7 +298,9 @@
                             <thead>
                                 <tr>
                                     <th data-ordering="false">No</th>
+                                    <th>Asin/Item Id</th>
                                     <th>FNSKU/GTIN</th>
+                                    <th>Msku/Sku</th>
                                     <th>Product Item Name</th>
                                     <th>Pack</th>
                                     <th>QTY</th>
@@ -321,8 +323,17 @@
                                             }
                                         @endphp
                                         <a id="asin-link" href="{{ $link }}" target="_blank" >{{ $detail->product->asin}} <i class="ri-external-link-line text-primary fs-4"></i></a>
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->asin}}')" title="Copy Asin"></i>
                                     </td>
-                                <td>@if($detail->product != null) <a target="_blank" href="{{ route('products.show',$detail->fnsku) }}">{{ $detail->product->item }}</a> @else -- @endif</td>
+                                    <td>
+                                        {{ $detail->product->fnsku }}
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->fnsku}}')" title="Copy Fnsku"></i>
+                                    </td>
+                                    <td>
+                                        {{ $detail->product->msku }}
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->msku}}')" title="Copy Msku"></i>
+                                    </td>
+                                <td>@if($detail->product != null) <a target="_blank" href="{{ route('products.show',$detail->product->id) }}">{{ $detail->product->item }}</a> @else -- @endif</td>
                                     <td>{{ $detail->pack }}</td>
                                     <td>{{ $detail->qty }}</td>
                                     @php
@@ -521,14 +532,10 @@
 
 
         var routeUrl = '{{ route('daily.input.fnsku') }}';
-        $('#fnsku-input').on('change', function() {
-            var fnskuValue = $(this).val();
-            
+        $('#product_id').on('change', function() {
+            var fnskuValue = $('#product_id').val();
+            // console.log(fnskuValue)
             // Validate the input value if needed
-            if (fnskuValue.trim() === '') {
-                return; // or handle empty input case
-            }
-
             $.ajax({
                 url: routeUrl,
                 type: 'POST',
@@ -536,15 +543,23 @@
                     fnsku: fnskuValue,
                     _token: '{{ csrf_token() }}'
                 },
+                async:false,
                 success: function(response) {
                     if (response.success) {
                         console.log(response.data);
+                        $('#fnsku-input').val(response.data.fnsku);
                         $('#item').val(response.data.item);
                         $('#pack').val(response.data.pack);
                         $('#msku').val(response.data.msku);
                         $('#asin').val(response.data.asin);
                         $('#product_id').val(response.data.id);
-                    } 
+                    } else{
+                        $('#fnsku-input').val('');
+                        $('#item').val('');
+                        $('#pack').val('');
+                        $('#msku').val('');
+                        $('#asin').val('');
+                    }
                     // else {
                     //     $('#product-name').text('Product not found.');
                     // }
@@ -591,7 +606,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 return {
-                                    id: item.fnsku, // The value you want to return
+                                    id: item.id, // The value you want to return
                                     text: `${item.item} | ${item.asin} | ${item.msku} | ${item.fnsku} | ${item.pack}` // The text that appears in the dropdown
                                 };
                             })
@@ -625,7 +640,8 @@
                 return {
                     id: term, // New value when item is not found
                     text: `Add new item: ${term}`, // Text that shows "Add new item"
-                    newTag: true // Mark it as a new tag
+                    newTag: true, // Mark it as a new tag
+                     isNew: true // custom flag you can detect later
                 };
             },
             insertTag: function (data, tag) {
@@ -635,21 +651,60 @@
                 }
             }
         });
-        $('#daily-input-detail').on('change',function(){
-            var fnku = $(this).val();
+        // $('#daily-input-detail').on('change',function(){
+        //     var fnku = $(this).val();
 
-            if (fnku && fnku.length > 0) {
-                // If a value is selected, assign it to another input
-                $('#fnsku-input').val(fnku).trigger('change');
+        //     if (fnku && fnku.length > 0) {
+        //         // If a value is selected, assign it to another input
+        //         // $('#fnsku-input').val(fnku).trigger('change');
+        //         $('#product_id').val(fnku).trigger('change');
+        //     }
+
+        //     // Clear the selection and re-trigger the search
+        //     $(this).val(null).trigger('change.select2'); // Clear select2 and refresh it
+
+        //     // Re-trigger the dropdown to show available options
+        //     $(this).select2('open'); // Automatically open dropdown after clearing
+        // })
+        $('#daily-input-detail').on('select2:select', function (e) {
+            var data = e.params.data;
+
+            if (data && data.isNew) {
+                $('#product_id').val(null).trigger('change');
+                $('#fnsku-input').val(data.id);
+                // You can access data.id, data.text, etc.
+            } else {
+                $('#product_id').val(data.id).trigger('change');
             }
-
-            // Clear the selection and re-trigger the search
-            $(this).val(null).trigger('change.select2'); // Clear select2 and refresh it
-
-            // Re-trigger the dropdown to show available options
-            $(this).select2('open'); // Automatically open dropdown after clearing
-        })
+            // Clear and reopen dropdown
+            $(this).val(null).trigger('change.select2');
+            $(this).select2('open');
+        });
     });
-
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert(`Copied: ${text}`);
+                })
+                .catch(err => {
+                    console.error('Failed to copy using clipboard API:', err);
+                });
+        } else {
+            // Fallback for older browsers
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+            try {
+                document.execCommand('copy');
+                alert(`Copied: ${text}`); 
+            } catch (err) {
+                alert('Failed to copy using execCommand:', err);
+            }
+            document.body.removeChild(input);
+        }
+    }
 </script>
 @endsection

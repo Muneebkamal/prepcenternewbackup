@@ -160,8 +160,9 @@ class DailyInputController extends Controller
             $details = DailyInputDetail::whereIn('daily_input_id', $report_ids)->whereNull('deleted_at')->get();
             $details = DailyInputDetail::whereIn('daily_input_id', $report_ids)
             ->whereNull('deleted_at')
-            ->selectRaw('fnsku, pack, SUM(qty) as qty')
-            ->groupBy('fnsku', 'pack')
+            ->selectRaw('product_id, pack, SUM(qty) as qty')
+            ->groupBy('product_id', 'pack')
+            ->with('product')
             ->get();
             // dd($details);
         return view('dashboard', compact('report_by_times', 'details'));
@@ -380,7 +381,12 @@ class DailyInputController extends Controller
         $daily_input_id = $request->daily_input_id;
         $fnsku_value = $request->fnsku;
         $product_id = $request->product_id;
-        $detail_update = DailyInputDetail::where('daily_input_id', $daily_input_id)->where('product_id', $product_id)->first();
+        $detail_update = DailyInputDetail::where('daily_input_id', $daily_input_id)
+        
+        ->when(!is_null($product_id), function ($query) use ($product_id) {
+            $query->where('product_id', $product_id);
+        })
+        ->first();
         if($detail_update){
             $old_qty = $detail_update->qty;
             $new_qty = $old_qty + $request->qty;
@@ -402,11 +408,13 @@ class DailyInputController extends Controller
                 $new_product->msku =  $request->msku != null?$request->msku:'0000000000';
                 $new_product->asin =  $request->asin != null?$request->asin:'0000000000';
                 $new_product->save();
+                $detail_update->product_id = $new_product->id;
             }else{
                 $product->msku =  $request->msku != null?$request->msku:$product->msku;
                 $product->asin =  $request->asin != null?$request->asin: $product->asin ;
                 $product->item = $request->item;
                 $product->pack = $request->pack;
+                $detail_update->product_id = $product->id;
                 $product->save();
             }
             $detail_update->save();
@@ -435,11 +443,13 @@ class DailyInputController extends Controller
                 $new_product->msku =  $request->msku != null?$request->msku:'0000000000';
                 $new_product->asin =  $request->asin != null?$request->asin:'0000000000';
                 $new_product->save();
+                $detail->product_id = $new_product->id;
             }else{
                 $product->msku =  $request->msku != null?$request->msku:$product->msku;
                 $product->asin =  $request->asin != null?$request->asin: $product->asin ;
                 $product->item = $request->item;
                 $product->pack = $request->pack;
+                $detail->product_id = $product->id;
                 $product->save();
             }
             
@@ -503,7 +513,7 @@ class DailyInputController extends Controller
     public function checkFnsku(Request $request)
     {
         $fnsku = $request->fnsku;
-        $product =  Products::where('fnsku', $fnsku)->first();
+        $product =  Products::where('id', $fnsku)->first();
         
         if ($product) {
             return response()->json([

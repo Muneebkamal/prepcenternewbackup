@@ -5,7 +5,7 @@
 @section('content')
 
 <div class="container-fluid">
-    
+
     @if (session('success'))
         <div class="alert alert-success" id="success-alert">
             {{ session('success') }}
@@ -42,12 +42,8 @@
                                 @endphp
                                 <tr>
                                     <td>Working Date</td>
-                                    <td>
-                                        <span class="ms-2">{{ \Carbon\Carbon::parse($daily_input->date)->format('D, M j, Y') }}</span>
-                                        @if(Auth()->user()->role == 1)
-                                        <a href="#" class="ms-2 text-primary edit-date" data-id="{{ $daily_input->id }}" data-date="{{ $daily_input->date }}">
-                                           (<i class="ri-pencil-fill align-bottom"></i> Edit)
-                                        @endif
+                                    <td>:<span class="ms-2">{{ \Carbon\Carbon::parse($daily_input->date)->format('D, M j, Y') }}</span>
+                                        
                                     </td>
                                 </tr>
                                 <tr>
@@ -99,7 +95,7 @@
                                 @if($daily_input_details->isNotEmpty())
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <table class="table table-striped align-middle" style="width:100%">
+                                            <table class="table  table-striped align-middle" style="width:100%">
                                                 <tr>
                                                     <td>Total QTY</td>
                                                     <td><span class="ms-2">{{ $qtys }}</span></td>
@@ -131,6 +127,57 @@
     </div>
     <div class="row">
         <div class="col-lg-12">
+            {{-- <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4 class="card-title mb-0 flex-grow-1">+ Add Daily Input Detail Record Below :</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <select id="daily-input-detail" class="form-control" style="width: 300px;" >
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="qty" id="qty" class="form-control" placeholder="QTY">
+                        </div>
+                    </div>
+                    
+                    
+                </div><!-- end card header -->
+                
+                <div class="card-body">
+                    <form id="editForm">
+                        @csrf
+
+                        <div class="row">
+                            <input type="hidden" name="daily_input_id" value="{{ $daily_input->id }}">
+                            <div class="col-md-6 mt-2">
+                                <input class="form-control" type="text" placeholder="FNSKU/GTIN" id="fnsku-input" name="fnsku" required>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <input type="text" id="item" name="item" class="form-control" placeholder="Item Name">
+                            </div>
+                            
+                            <div class="col-md-6 mt-2">
+                                <input type="number" id="pack" name="pack" class="form-control" placeholder="Pack">
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <input type="text" id="msku" name="msku" class="form-control" placeholder="MSKU">
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <input type="text" id="asin" name="asin" class="form-control" placeholder="ASIN">
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button class="btn btn-danger" id="resetButton">RESET</button>
+                                    <button type="submit" class="btn btn-primary ms-2">+ Add Record</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> --}}
             <div class="card">
                 <div class="card-header">
                     <div class="row">
@@ -183,7 +230,6 @@
                         <div class="row">
                             <input type="hidden" name="daily_input_id" value="{{ $daily_input->id }}">
                             <input type="hidden" name="product_id" id="product_id" value="">
-
                             <div class="col-md-6 mt-2">
                                 <div class="input-group">
                                     <span class="input-group-text">
@@ -198,7 +244,7 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-box-seam"></i> Item Name
                                     </span>
-                                    <input type="text" id="item" name="item" class="form-control" >
+                                    <input type="text" id="item" name="item" class="form-control" required  >
                                 </div>
                             </div>
                             <div class="col-md-6 mt-2">
@@ -224,7 +270,7 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-upc-scan"></i> ASIN / ITEM ID
                                     </span>
-                                    <input type="text" id="asin" name="asin" class="form-control" >
+                                    <input type="text" id="asin" name="asin" class="form-control" required>
                                 </div>
                             </div>
                         
@@ -253,7 +299,9 @@
                             <thead>
                                 <tr>
                                     <th data-ordering="false">No</th>
+                                    <th>Asin/Item Id</th>
                                     <th>FNSKU/GTIN</th>
+                                    <th>Msku/Sku</th>
                                     <th>Product Item Name</th>
                                     <th>Pack</th>
                                     <th>QTY</th>
@@ -264,8 +312,8 @@
                                 @foreach($daily_input_details as $detail)
                                 <tr>
                                     <td>{{ $detail->id }}</td>
-                                     <td>
-                                         @php
+                                    <td>
+                                        @php
                                             $firstChar = $detail->fnsku[0];
                                             if ($firstChar === 'X') {
                                                 $link = "https://www.amazon.com/dp/{$detail->product->asin}";
@@ -276,8 +324,17 @@
                                             }
                                         @endphp
                                         <a id="asin-link" href="{{ $link }}" target="_blank" >{{ $detail->product->asin}} <i class="ri-external-link-line text-primary fs-4"></i></a>
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->asin}}')" title="Copy Asin"></i>
                                     </td>
-                                    <td>@if($detail->product != null) <a target="_blank" href="{{ route('products.show',$detail->fnsku) }}">{{ $detail->product->item }}</a> @else -- @endif</td>
+                                    <td>
+                                        {{ $detail->product->fnsku }}
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->fnsku}}')" title="Copy Fnsku"></i>
+                                    </td>
+                                    <td>
+                                        {{ $detail->product->msku }}
+                                        <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('{{ $detail->product->msku}}')" title="Copy Msku"></i>
+                                    </td>
+                                <td>@if($detail->product != null) <a target="_blank" href="{{ route('products.show',$detail->product->id) }}">{{ $detail->product->item }}</a> @else -- @endif</td>
                                     <td>{{ $detail->pack }}</td>
                                     <td>{{ $detail->qty }}</td>
                                     @php
@@ -358,34 +415,13 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
-<!-- Date Update Modal -->
-<div class="modal fade" id="updateDateModal" tabindex="-1" aria-labelledby="updateDateModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="updateDateModalLabel">Update Date</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="updateDateForm">
-          <input type="hidden" id="dailyInputId">
-          <div class="mb-3">
-            <label for="newDate" class="form-label">Select New Date</label>
-            <input type="date" class="form-control" id="newDate" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Update Date</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
 @endsection
 
 @section('script')
 <script>
     $(document).ready(function() {
-        // Trigger form submission on Enter key press
+
         $('#daily-input-detail, #qty').on('keypress', function (e) {
             if (e.which === 13) {  // Enter key press
                 e.preventDefault(); // Prevent default Enter key behavior
@@ -406,7 +442,6 @@
         $('#error-alert').each(function() {
             setTimeout(() => $(this).fadeOut('slow'), 2000); 
         });
-
         // Populate modal fields with data attributes
         $('.edit-item-btn').on('click', function() {
             var pack = $(this).data('pack');
@@ -447,7 +482,7 @@
                     if (response.success) {
                         var id = response.id;
                         var url = "{{ route('daily-input.show', ':id') }}".replace(':id', id);
-                        window.location.href = url;
+                        window.location.reload(true);
                     } else {
                         alert('An error occurred.');
                     }
@@ -498,14 +533,10 @@
 
 
         var routeUrl = '{{ route('daily.input.fnsku') }}';
-        $('#fnsku-input').on('change', function() {
-            var fnskuValue = $(this).val();
-            
+        $('#product_id').on('change', function() {
+            var fnskuValue = $('#product_id').val();
+            // console.log(fnskuValue)
             // Validate the input value if needed
-            if (fnskuValue.trim() === '') {
-                return; // or handle empty input case
-            }
-
             $.ajax({
                 url: routeUrl,
                 type: 'POST',
@@ -513,21 +544,22 @@
                     fnsku: fnskuValue,
                     _token: '{{ csrf_token() }}'
                 },
+                async:false,
                 success: function(response) {
                     if (response.success) {
                         console.log(response.data);
+                        $('#fnsku-input').val(response.data.fnsku);
                         $('#item').val(response.data.item);
                         $('#pack').val(response.data.pack);
                         $('#msku').val(response.data.msku);
                         $('#asin').val(response.data.asin);
                         $('#product_id').val(response.data.id);
-                    }else{
+                    } else{
+                        $('#fnsku-input').val('');
                         $('#item').val('');
                         $('#pack').val('');
                         $('#msku').val('');
                         $('#asin').val('');
-                        $('#product_id').val('');
-
                     }
                     // else {
                     //     $('#product-name').text('Product not found.');
@@ -540,22 +572,20 @@
             });
         });
         $('#editForm').on('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent form submission on Enter key press
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission on Enter key press
 
-                    // Check if FNSKU and QTY fields have values
-                    var fnsku = $('#fnsku-input').val().trim();
-                    var qty = $('input[name="qty"]').val().trim();
+                // Check if FNSKU and QTY fields have values
+                var fnsku = $('#fnsku-input').val().trim();
+                var qty = $('input[name="qty"]').val().trim();
 
-                    if (fnsku && qty) {
-                        $('#editForm').submit(); // Submit the form
-                    } else {
-                        alert('Please fill in both FNSKU and QTY fields.');
-                    }
+                if (fnsku && qty) {
+                    $('#editForm').submit(); // Submit the form
+                } else {
+                    alert('Please fill in both FNSKU and QTY fields.');
                 }
+            }
         });
-        let hasResults = false; // Flag to track if results are found
-
         $('#daily-input-detail').select2({
             placeholder: 'Select Detail',
             ajax: {
@@ -577,7 +607,7 @@
                         return {
                             results: $.map(data, function (item) {
                                 return {
-                                    id: item.fnsku, // The value you want to return
+                                    id: item.id, // The value you want to return
                                     text: `${item.item} | ${item.asin} | ${item.msku} | ${item.fnsku} | ${item.pack}` // The text that appears in the dropdown
                                 };
                             })
@@ -611,7 +641,8 @@
                 return {
                     id: term, // New value when item is not found
                     text: `Add new item: ${term}`, // Text that shows "Add new item"
-                    newTag: true // Mark it as a new tag
+                    newTag: true, // Mark it as a new tag
+                     isNew: true // custom flag you can detect later
                 };
             },
             insertTag: function (data, tag) {
@@ -621,75 +652,60 @@
                 }
             }
         });
+        // $('#daily-input-detail').on('change',function(){
+        //     var fnku = $(this).val();
 
+        //     if (fnku && fnku.length > 0) {
+        //         // If a value is selected, assign it to another input
+        //         // $('#fnsku-input').val(fnku).trigger('change');
+        //         $('#product_id').val(fnku).trigger('change');
+        //     }
 
+        //     // Clear the selection and re-trigger the search
+        //     $(this).val(null).trigger('change.select2'); // Clear select2 and refresh it
 
+        //     // Re-trigger the dropdown to show available options
+        //     $(this).select2('open'); // Automatically open dropdown after clearing
+        // })
+        $('#daily-input-detail').on('select2:select', function (e) {
+            var data = e.params.data;
 
-            $('#daily-input-detail').on('change',function(){
-                var fnku = $(this).val();
-    
-                if (fnku && fnku.length > 0) {
-                    // If a value is selected, assign it to another input
-                    $('#fnsku-input').val(fnku).trigger('change');
-                }
-
-                // Clear the selection and re-trigger the search
-                $(this).val(null).trigger('change.select2'); // Clear select2 and refresh it
-
-                // Re-trigger the dropdown to show available options
-                $(this).select2('open'); // Automatically open dropdown after clearing
-            })
+            if (data && data.isNew) {
+                $('#product_id').val(null).trigger('change');
+                $('#fnsku-input').val(data.id);
+                // You can access data.id, data.text, etc.
+            } else {
+                $('#product_id').val(data.id).trigger('change');
+            }
+            // Clear and reopen dropdown
+            $(this).val(null).trigger('change.select2');
+            $(this).select2('open');
         });
-         $(document).ready(function() {
-            // Trigger the modal when edit icon is clicked
-            $('.edit-date').on('click', function(e) {
-                e.preventDefault();
-
-                // Get the data attributes (id and current date) from the clicked icon
-                var dailyInputId = $(this).data('id');
-                var currentDate = $(this).data('date');
-
-                // Set the values in the modal
-                $('#dailyInputId').val(dailyInputId);
-                $('#newDate').val(currentDate);
-
-                // Show the modal
-                $('#updateDateModal').modal('show');
-            });
-
-            // Handle form submission to update the date
-            $('#updateDateForm').on('submit', function(e) {
-                e.preventDefault();
-
-                // Get the form data
-                var dailyInputId = $('#dailyInputId').val();
-                var newDate = $('#newDate').val();
-
-                // AJAX request to update the date
-                $.ajax({
-                    url: "{{ url('update-daily-input-date') }}",  // Your update route
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',  // CSRF token for Laravel
-                        id: dailyInputId,
-                        date: newDate
-                    },
-                    success: function(response) {
-                        // Close the modal
-                        $('#updateDateModal').modal('hide');
-
-                        // Optionally, update the displayed date on the page without reload
-                        $('a[data-id="' + dailyInputId + '"]').prev().text(new Date(newDate).toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'}));
-
-                        // You can also show a success message here
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle errors (e.g., validation errors)
-                        alert('Error updating date: ' + error);
-                    }
+    });
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert(`Copied: ${text}`);
+                })
+                .catch(err => {
+                    console.error('Failed to copy using clipboard API:', err);
                 });
-            });
-        });
-
+        } else {
+            // Fallback for older browsers
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+            try {
+                document.execCommand('copy');
+                alert(`Copied: ${text}`); 
+            } catch (err) {
+                alert('Failed to copy using execCommand:', err);
+            }
+            document.body.removeChild(input);
+        }
+    }
 </script>
 @endsection

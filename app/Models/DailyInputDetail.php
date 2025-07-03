@@ -16,7 +16,7 @@ class DailyInputDetail extends Model
     // Define the inverse of the one-to-one relationship
     public function product()
     {
-        return $this->belongsTo(Products::class, 'fnsku', 'fnsku');
+        return $this->belongsTo(Products::class, 'product_id', 'id');
     }
     
     public function details()
