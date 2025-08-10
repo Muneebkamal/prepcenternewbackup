@@ -151,7 +151,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/shipping-plans',ShippingPlanController::class);
     Route::post('/save-shipping-item',[ShippingPlanController::class,'saveItem']);
     Route::get('/get-shipping-plan-items/{custom_id?}' ,[ShippingPlanController::class,'getShippingItems']);
-    
+    Route::delete('/shipping-plans/{id}', [ShippingPlanController::class, 'destroy'])->name('shipping-plans.destroy');
+    Route::delete('/shipping-plans/{id}/delete-product', [ShippingPlanController::class, 'deleteProduct'])
+    ->name('shipping-plans.delete-product');
 
 
 });

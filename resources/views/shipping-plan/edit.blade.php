@@ -14,21 +14,26 @@
         </div>
         <div class="col-md-6 text-end">
             <h6>Created By: {{ $shippingPlan->creator?->name ?? 'N/A' }}</h6>
-            <h6>Created At: {{ now() }}</h6>
+            <h6>Created At: {{ $shippingPlan->created_at->format('Y-m-d h:i A') }}</h6>
         </div>
     </div>
     <input type="hidden" name="ship_plan_id" id="ship_plan_id" value="{{ $shippingPlan->custom_id }}">
     <h2 class="mb-4">Send to Amazon</h2>
     <div class="card mb-3">
       <div class="card-body">
-        <h5>Step 1: Choose inventory to send</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 text-end">Step 1: Choose inventory to send</h5>
+            <button type="button" class="btn btn-danger" id="deleteShippingPlan" onclick="deleteShippingPlan({{ $shippingPlan->id }})">
+                Delete
+            </button>
+        </div>
         <ul class="nav nav-tabs my-3">
           <li class="nav-item">
             <a class="nav-link active" href="#">All FBA SKUs</a>
           </li>
-          <li class="nav-item">
+          {{-- <li class="nav-item">
             <a class="nav-link" href="#">SKUs ready to send (0)</a>
-          </li>
+          </li> --}}
         </ul>
 
         <div class="row g-3">
@@ -51,8 +56,8 @@
             <div class="col-md-2">
                 <label class="form-label">Marketplace destination</label>
                 <select class="form-select" name="market_place" id="market_place">
-                <option value="us" {{ $shippingPlan->market_place == 'us'?'selected':''  }}>United States</option>
-                <option value="ca" {{ $shippingPlan->market_place == 'ca'?'selected':''  }}>Canada</option>
+                <option value="us" selected>United States</option>
+                <option value="ca" >Canada</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -122,6 +127,7 @@
                 <th>Use Original Box </th>
                 <th>Box weight (lb) </th>
                 <th>Total Cost </th>
+                <th>Total Weight </th>
                 <th>Information/Action</th>
                 <th>Quantity to Send</th>
                 <th>Actions</th>
@@ -167,7 +173,7 @@
                 <div class="row mb-3">
                     <div class="col-md-3">
                         <label for="unitsPerBox" class="form-label">Units per box</label>
-                        <input type="number" class="form-control" id="unitsPerBox">
+                        <input type="number" class="form-control" id="unitsPerBox" focus>
                     </div>
                     <div class="col-md-3">
                     <label class="form-label">Box dimensions (inch)</label>
@@ -428,6 +434,9 @@
                     <td>
                         <span id="costTotal${item.id}"></span>
                     </td>
+                    <td>
+                        <span id="totalWeight${item.id}"></span>
+                    </td>
                     
                     <td>
                         <div>Prep required: ${item.prep || 'None'}</div>
@@ -441,7 +450,7 @@
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Units</label>
-                                <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]">
+                                <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" readonly>
                             </div>
                         </div>
                         <div>
@@ -550,9 +559,17 @@
         let selectedVal = $('#templateType' + productId).val();
         if (selectedVal === 'new_template') {
             $('#prodcutId').val(productId);
-            $('#newTemplateModal').modal('show');
+            $('#newTemplateModal')
+            .off('shown.bs.modal') // prevent multiple bindings
+            .on('shown.bs.modal', function () {
+                $('#unitsPerBox').trigger('focus');
+            })
+            .modal('show');
         }
     }
+    $('#packingTemplateModal').on('shown.bs.modal', function () {
+        $('#unitsPerBox').trigger('focus');
+    });
     $('#saveTemplate').on('click', function () {
         var productId = $('#prodcutId').val();
         $.ajax({
@@ -653,6 +670,10 @@
             totalCost = parseFloat(template.box_weight) * parseInt(template.units_per_box);
         }
         $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
+        // Calculate total weight: boxes * box_weight
+        const boxes = $(`input[name="boxes[${itemId}]"]`).val() || 0;
+        const totalWeight = boxes * (template.box_weight || 0);
+        $(`#totalWeight${itemId}`).text(totalWeight ? totalWeight.toFixed(2) : '');
     }
     $(document).on('input', 'input[name^="boxes["]', function () {
         const boxInput = $(this);
@@ -668,6 +689,7 @@
     });
     function saveProductData(itemId, productId) {
         const boxes = $(`input[name="boxes[${itemId}]"]`).val();
+        console.log(boxes);
         const units = $(`input[name="units[${itemId}]"]`).val();
         const expiration = $(`input[name="expiration[${itemId}]"]`).val();
         const templateType = $(`#templateType${itemId}`).val();
@@ -749,7 +771,7 @@
                 <td>
                     <div class="mb-3">
                         <label for="templateType" class="form-label">Template type</label>
-                        <select class="form-select" id="templateType${item.product_id}" name="templateType${item.product_id}" onchange="createNewTemp(${item.id})">
+                        <select class="form-select" id="templateType${item.product_id}" name="templateType${item.product_id}" onchange="createNewTemp(${item.product_id})">
                         <option value="case_pack">Case pack</option>
                         <option value="individual_units">Individual units</option>
                         </select>
@@ -764,6 +786,7 @@
                 <td><span id="original_pack${item.product_id}"></span></td>
                 <td><span id="box_weight${item.product_id}"></span></td>
                 <td><span id="costTotal${item.product_id}"></span></td>
+                <td><span id="totalWeight${item.product_id}"></span></td>
                 <td>
                     <div>Prep required: ${item.prep || 'None'}</div>
                     <div>Labeling: By seller – <a href="#">Print SKU labels</a></div>
@@ -776,7 +799,7 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label">Units</label>
-                            <input type="number" class="form-control form-control-sm" min="0" name="units[${item.product_id}]" value="${item.units || ''}">
+                            <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" value="${item.units || ''}" readonly>
                         </div>
                     </div>
                     <div>
@@ -787,6 +810,9 @@
                 <td>
                     <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id}, ${item.product_id || item.id})">
                         Save
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteProcut(${item.id}, ${item.product_id || item.id})">
+                        Delete
                     </button>
                 </td>
             </tr>
@@ -806,6 +832,82 @@
             }
         });
     }
+    function deleteShippingPlan(id){
+        if (!confirm('Are you sure you want to delete this shipping plan?')) {
+            return;
+        }
+        $.ajax({
+            url: '/shipping-plans/' + id,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                toastr.success('Shipping plan deleted successfully');
+                window.location.href = '/shipping-plans';
+            },
+            error: function (xhr) {
+                toastr.error('Error deleting shipping plan');
+            }
+        });
+    }
+    function deleteProcut(id, product_id){
+        if (!confirm('Are you sure you want to delete this product from the shipping plan?')) {
+            return;
+        }
+        $.ajax({
+            url: `{{ url('/shipping-plans/${id}/delete-product') }}`,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',
+                product_id: product_id
+            },
+            success: function (response) {
+                toastr.success('Product deleted successfully');
+                getOldITems(ship_plan_id_g);
+            },
+            error: function (xhr) {
+                toastr.error('Error deleting product');
+            }
+        });
+    }
+    function updateTemplateName() {
+        const units = document.getElementById('unitsPerBox').value;
+        const type = document.getElementById('templateType').value;
+        const nameField = document.getElementById('templateName');
+
+        if (!units || units <= 0) {
+            nameField.value = '';
+            return;
+        }
+
+        if (type === 'case_pack') {
+            nameField.value = `${units} case pack`;
+        } else if (type === 'individual_units') {
+            nameField.value = `${units} per case`;
+        }
+    }
+    document.getElementById('unitsPerBox').addEventListener('input', updateTemplateName);
+    document.getElementById('templateType').addEventListener('change', updateTemplateName);
+    function updateTemplateNameEdit() {
+        const units = document.getElementById('editUnitsPerBox').value;
+        const type = document.getElementById('editTemplateType').value;
+        const nameField = document.getElementById('editTemplateName');
+
+        if (!units || units <= 0) {
+            nameField.value = '';
+            return;
+        }
+
+        if (type === 'case_pack') {
+            nameField.value = `${units} case pack`;
+        } else if (type === 'individual_units') {
+            nameField.value = `${units} per case`;
+        }
+    }
+
+    document.getElementById('editUnitsPerBox').addEventListener('input', updateTemplateNameEdit);
+    document.getElementById('editTemplateType').addEventListener('change', updateTemplateNameEdit);
 
 
 </script>

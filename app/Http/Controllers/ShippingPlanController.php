@@ -67,7 +67,10 @@ class ShippingPlanController extends Controller
     }
     public function destroy($id)
     {
-        return view('shipping-plan.create');
+        $plan = ShipPlan::findOrFail($id);
+        $plan->delete();
+
+        return response()->json(['success' => true]);
     }
     public function saveItem(Request $request){
         $item = ShipPlanDetail::where('ship_plan_id',$request->ship_plan_id)->where('product_id',$request->product_id)->first();
@@ -94,5 +97,21 @@ class ShippingPlanController extends Controller
     public function getShippingItems($custom_id){
         $items = ShipPlanDetail::where('ship_plan_id',$custom_id)->with('product')->get();
         return response()->json($items);
+    }
+    public function deleteProduct($id, Request $request)
+    {
+        $productId = $request->product_id;
+
+
+        // Example: shipping_plan_products
+        $deleted = ShipPlanDetail::where('id', $id)
+        ->where('product_id', $productId)
+        ->delete();
+
+        if ($deleted) {
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 400);
     }
 }

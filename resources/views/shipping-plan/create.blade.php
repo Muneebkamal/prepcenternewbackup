@@ -26,9 +26,9 @@
           <li class="nav-item">
             <a class="nav-link active" href="#">All FBA SKUs</a>
           </li>
-          <li class="nav-item">
+          {{-- <li class="nav-item">
             <a class="nav-link" href="#">SKUs ready to send (0)</a>
-          </li>
+          </li> --}}
         </ul>
 
         <div class="row g-3">
@@ -51,7 +51,7 @@
             <div class="col-md-2">
                 <label class="form-label">Marketplace destination</label>
                 <select class="form-select" name="market_place" id="market_place">
-                <option value="us">United States</option>
+                <option value="us" selected>United States</option>
                 <option value="ca">Canada</option>
                 </select>
             </div>
@@ -122,6 +122,7 @@
                 <th>Use Original Box </th>
                 <th>Box weight (lb) </th>
                 <th>Total Cost </th>
+                <th>Total Weight </th>
                 <th>Information/Action</th>
                 <th>Quantity to Send</th>
                 <th>Actions</th>
@@ -316,7 +317,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script>
-    $(document).ready(function () {
+        $(document).ready(function () {
+        const ship_plan_id_g = $(`#ship_plan_id`).val();
         $('#skuSearchInput').select2({
             placeholder: 'Search SKU, ASIN, or Name...',
             allowClear: true,
@@ -426,6 +428,9 @@
                     <td>
                         <span id="costTotal${item.id}"></span>
                     </td>
+                    <td>
+                        <span id="totalWeight${item.id}"></span>
+                    </td>
                     
                     <td>
                         <div>Prep required: ${item.prep || 'None'}</div>
@@ -439,7 +444,7 @@
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Units</label>
-                                <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]">
+                                <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" readonly>
                             </div>
                         </div>
                         <div>
@@ -548,9 +553,17 @@
         let selectedVal = $('#templateType' + productId).val();
         if (selectedVal === 'new_template') {
             $('#prodcutId').val(productId);
-            $('#newTemplateModal').modal('show');
+            $('#newTemplateModal')
+            .off('shown.bs.modal') // prevent multiple bindings
+            .on('shown.bs.modal', function () {
+                $('#unitsPerBox').trigger('focus');
+            })
+            .modal('show');
         }
     }
+    $('#packingTemplateModal').on('shown.bs.modal', function () {
+        $('#unitsPerBox').trigger('focus');
+    });
     $('#saveTemplate').on('click', function () {
         var productId = $('#prodcutId').val();
         $.ajax({
@@ -651,6 +664,9 @@
             totalCost = parseFloat(template.box_weight) * parseInt(template.units_per_box);
         }
         $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
+        const boxes = $(`input[name="boxes[${itemId}]"]`).val() || 0;
+        const totalWeight = boxes * (template.box_weight || 0);
+        $(`#totalWeight${itemId}`).text(totalWeight ? totalWeight.toFixed(2) : '');
     }
     $(document).on('input', 'input[name^="boxes["]', function () {
         const boxInput = $(this);
@@ -732,6 +748,43 @@
             }
         });
     }
+    function updateTemplateName() {
+        const units = document.getElementById('unitsPerBox').value;
+        const type = document.getElementById('templateType').value;
+        const nameField = document.getElementById('templateName');
+
+        if (!units || units <= 0) {
+            nameField.value = '';
+            return;
+        }
+
+        if (type === 'case_pack') {
+            nameField.value = `${units} case pack`;
+        } else if (type === 'individual_units') {
+            nameField.value = `${units} per case`;
+        }
+    }
+    document.getElementById('unitsPerBox').addEventListener('input', updateTemplateName);
+    document.getElementById('templateType').addEventListener('change', updateTemplateName);
+    function updateTemplateNameEdit() {
+        const units = document.getElementById('editUnitsPerBox').value;
+        const type = document.getElementById('editTemplateType').value;
+        const nameField = document.getElementById('editTemplateName');
+
+        if (!units || units <= 0) {
+            nameField.value = '';
+            return;
+        }
+
+        if (type === 'case_pack') {
+            nameField.value = `${units} case pack`;
+        } else if (type === 'individual_units') {
+            nameField.value = `${units} per case`;
+        }
+    }
+
+    document.getElementById('editUnitsPerBox').addEventListener('input', updateTemplateNameEdit);
+    document.getElementById('editTemplateType').addEventListener('change', updateTemplateNameEdit);
 
 </script>
 @endsection

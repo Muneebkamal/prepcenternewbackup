@@ -40,7 +40,7 @@
                                 <td>
                                   <div class="d-flex justify-content-between">
                                       <a href="{{ route('prep-orders.editData', $order->custom_id) }}">
-                                        {{ $order->custom_id }}
+                                        {{ $order->custom_id }} -  {{ $order->name }}
                                     </a>
 
                                     <a href="{{ route('prep-orders.editData', $order->custom_id) }}" class="btn btn-sm btn-primary ms-2">

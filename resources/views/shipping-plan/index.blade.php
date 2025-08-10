@@ -35,7 +35,14 @@
                         @foreach ($shippingPlans as $shippingPlan )
                         <tr>
                             <td>
-                                <a href="{{ url('shipping-plans/' . $shippingPlan->custom_id . '/edit') }}">{{ $shippingPlan->custom_id }}</a>
+                                <a class="" href="{{ url('shipping-plans/' . $shippingPlan->custom_id . '/edit') }}">{{ $shippingPlan->custom_id }}
+                                    <span>
+                                      {{-- - {{ $shippingPlan->creator?->name ?? 'N/A' }}  --}}
+                                      -
+                                      {{ $shippingPlan->created_at->format('Y-m-d h:i A')  }}
+                                    </span> 
+                                
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ url('shipping-plans/' . $shippingPlan->custom_id . '/edit') }}" class="btn btn-warning">Edit</a>
