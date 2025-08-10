@@ -58,8 +58,9 @@ class ReportController extends Controller
         $report_by_times = $query->get();
         $details = DailyInputDetail::whereIn('daily_input_id', $dailyInputIds)
         ->whereNull('deleted_at')
-        ->selectRaw('fnsku, MAX(pack) as pack, SUM(qty) as qty')
-        ->groupBy('fnsku')
+        ->selectRaw('product_id, MAX(pack) as pack, SUM(qty) as qty')
+        ->groupBy('product_id')
+        ->with('product') // if you have a product() relationship in the model
         ->get();
         return view('reports.monthly-product-report', get_defined_vars());
     }

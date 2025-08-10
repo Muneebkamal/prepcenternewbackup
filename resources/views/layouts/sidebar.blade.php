@@ -173,6 +173,11 @@
                         </div>
                     </li>
                     @endif
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('shipping-plans') ? 'active' : '' }}" href="{{ route('shipping-plans.index') }}">
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Shipping Plan </span>
+                        </a>
+                    </li>
                         
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use SebastianBergmann\Template\Template;
 
 class Products extends Model
 {
@@ -39,5 +40,9 @@ class Products extends Model
     public function dailyInputDetails()
     {
         return $this->hasMany(DailyInputDetail::class, 'fnsku', 'fnsku')->with('dailyInput');
+    }
+    public function templates()
+    {
+        return $this->hasMany(PackingTemplate::class, 'product_id', 'id');
     }
 }

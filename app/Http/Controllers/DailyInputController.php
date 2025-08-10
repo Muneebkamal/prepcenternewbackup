@@ -718,7 +718,7 @@ class DailyInputController extends Controller
             // Retrieve related product records
             $details = DailyInputDetail::whereIn('daily_input_id', $report_ids)
             ->whereNull('deleted_at')
-            ->selectRaw('fnsku, pack, SUM(qty) as qty')
+            ->selectRaw('fnsku, pack, MAX(id) as id, MAX(created_at) as created_at, MAX(product_id) as product_id, SUM(qty) as qty')
             ->groupBy('fnsku', 'pack')
             ->with('product')
             ->get();
@@ -795,14 +795,20 @@ class DailyInputController extends Controller
     }
     public function fetchItems(Request $request)
     {
-        $search = $request->input('search');
+       $search = trim($request->input('search'));
 
-        $items = Products::where('item', 'LIKE', "%{$search}%")
-            ->orWhere('asin', 'LIKE', "%{$search}%")
-            ->orWhere('msku', 'LIKE', "%{$search}%")
-            ->orWhere('fnsku', 'LIKE', "%{$search}%")
-            ->orWhere('pack', 'LIKE', "%{$search}%")
-            ->get();
+        if ($search) {
+            $items = Products::where(function ($query) use ($search) {
+                $query->where('item', 'LIKE', "%{$search}%")
+                    ->orWhere('asin', 'LIKE', "%{$search}%")
+                    ->orWhere('msku', 'LIKE', "%{$search}%")
+                    ->orWhere('fnsku', 'LIKE', "%{$search}%")
+                    ->orWhere('pack', 'LIKE', "%{$search}%");
+            })->with('templates')->get();
+        } else {
+            $items = collect(); // empty if no search
+        }
+
 
         return response()->json($items);
     }

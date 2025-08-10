@@ -32,6 +32,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center d-flex">
                     <h4 class="card-title mb-0 flex-grow-1">Edit Product</h4>
                     <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-danger ms-2" onclick="history.back()">Cancel</button>
                         <button type="submit" class="btn btn-primary ms-2" id="save-button">SAVE</button>
                         <button type="submit" class="btn btn-secondary ms-2" id="save-close-button">SAVE AND CLOSE</button>
                     </div>

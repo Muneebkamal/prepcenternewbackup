@@ -137,7 +137,7 @@
                                     <td>{{ $index +1 }}</td>
                                    <td>
                                         @php 
-                                        $firstChar = $detail->fnsku[0];
+                                        $firstChar = $detail->product->fnsku[0];
                                         if ($firstChar === 'X') {
                                             $link = "https://www.amazon.com/dp/{$detail->product->asin}";
                                         } elseif ($firstChar === '0') {
@@ -147,9 +147,9 @@
                                         }
                                     @endphp
                                     
-                                    <a href="{{ $link }}" target="_blank">{{ $detail->fnsku }} <i class="ri-external-link-line text-primary fs-4"></i></a> 
+                                    <a href="{{ $link }}" target="_blank">{{ $detail->product->fnsku }} <i class="ri-external-link-line text-primary fs-4"></i></a> 
                                     </td>
-                                    <td><a href="{{ route('products.show',$detail->fnsku) }}"target="_blank">{{ $detail->product != null?$detail->product->item:'--' }} </a></td>
+                                    <td><a href="{{ route('products.show',$detail->product->fnsku) }}"target="_blank">{{ $detail->product != null?$detail->product->item:'--' }} </a></td>
                                     <td class="text-center ">{{ $detail->pack }}</td>
                                     <td class="text-center ">{{ $detail->qty }}</td>
                                 </tr>

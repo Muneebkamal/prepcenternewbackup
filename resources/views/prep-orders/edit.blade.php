@@ -378,6 +378,16 @@
                     } else{
                          icon = `<img src="{{ asset('assets/prep-order-imgs/fba-logo.png') }}" alt="FBA Logo" width="40">`;
                     }
+                    const tpl = product.product.templates?.[0] || {};
+                    const unitsPerBox = tpl.units_per_box ? `${tpl.units_per_box} pcs` : '';
+                    const dimensions = tpl.box_length && tpl.box_width && tpl.box_height
+                        ? `${tpl.box_length} x ${tpl.box_width} x ${tpl.box_height} inch` : '';
+                    const boxWeight = tpl.box_weight ? `${tpl.box_weight} lb` : '';
+                    const labeling = tpl.labeling_by ? `${tpl.labeling_by}` : '';
+                    const originalBox = tpl.original_pack ? `Use original box` : '';
+                    const displayInfo = (unitsPerBox || dimensions || boxWeight || labeling || originalBox)
+                        ? `${unitsPerBox}<br>${dimensions}<br>${boxWeight}<br>${labeling}<br>${originalBox}`
+                        : '--';
 
                     var row = `<tr data-id="${product.id}">
                         <td>${count}
@@ -402,17 +412,8 @@
                             }
                         </td>
                         <td>
-                            ${
-                                product.product.no_of_pcs_in_carton || 
-                                product.product.carton_size || 
-                                product.product.weight ||
-                                product.product.use_orignal_box
-                                ? `${product.product.no_of_pcs_in_carton ? product.product.     no_of_pcs_in_carton + ' pcs' : ''} <br>
-                                    ${product.product.carton_size || ''} <br>
-                                    ${use_orignal_box} <br>
-                                    ${weight}`
-                                : '--'
-                            }
+                            
+                            ${displayInfo}
                         </td>
                         <td>
                             ${

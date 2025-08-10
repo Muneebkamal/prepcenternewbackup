@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PrepOrderController;
+use App\Http\Controllers\ShippingPlanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -146,7 +147,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/check-temp-fnsku', [ProductsController::class, 'checkTempFnsku'])->name('check-temp-fnsku');
     Route::get('/delteDuplaicateProduct', [ProductsController::class, 'delteDuplaicateProduct'])->name('delteDuplaicateProduct');
     Route::post('/update-prep-order-name', [PrepOrderController::class, 'updateName'])->name('updateName');
-
+    //shipping plan
+    Route::resource('/shipping-plans',ShippingPlanController::class);
+    Route::post('/save-shipping-item',[ShippingPlanController::class,'saveItem']);
+    Route::get('/get-shipping-plan-items/{custom_id?}' ,[ShippingPlanController::class,'getShippingItems']);
     
 
 

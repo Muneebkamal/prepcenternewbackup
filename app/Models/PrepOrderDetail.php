@@ -12,6 +12,6 @@ class PrepOrderDetail extends Model
     use HasFactory, SoftDeletes;
     protected $fillable = ['prep_order_id','product_id','fnsku','qty','pack'];
     public function product(){
-        return $this->belongsTo(Products::class, 'product_id');
+        return $this->belongsTo(Products::class, 'product_id')->with('templates');
     }
 }
