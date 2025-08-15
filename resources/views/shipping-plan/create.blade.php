@@ -32,7 +32,7 @@
         </ul>
 
         <div class="row g-3">
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
                 <label class="form-label d-block mb-2">SKU Selection Method</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" checked name="sku_method" value="list" id="skuList">
@@ -43,7 +43,7 @@
                     <label class="form-check-label" for="skuFile">File upload</label>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label class="form-label">Ship From</label>
                     <span>Favorite Commodities Inc, 3320 LAWSON BLVD, OCEANSIDE, NY, 11572, US</span>
                 <a href="#" class="small">Ship from another address</a>
@@ -61,7 +61,7 @@
                 <option value="full_fillment">Standard Fulfillment by Amazon</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
                  <label for="">Filter</label>
                 <div class="form-check ">
                    
@@ -79,9 +79,9 @@
         </div>
       </div>
     </div>
-    <div class="row mt-2 mb-2">
-        <div class="col-md-6"></div>
-        <div class="col-md-6">
+      <div class="row mt-2 mb-2">
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
             <div class="row">
                 <div class="col-md-4"></div>
                 <div class="col-md-8 text-end">
@@ -98,7 +98,7 @@
     <div class="card">
         
 
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center d-none">
             <div>
                     <strong>Lower your storage fees by up to 84%</strong>
                     <p>
@@ -121,9 +121,9 @@
                 <th>Box dimensions (inch)</th>
                 <th>Use Original Box </th>
                 <th>Box weight (lb) </th>
-                <th>Total Cost </th>
+                {{-- <th>Total Cost </th> --}}
                 <th>Total Weight </th>
-                <th>Information/Action</th>
+                {{-- <th>Information/Action</th> --}}
                 <th>Quantity to Send</th>
                 <th>Actions</th>
                 </tr>
@@ -135,7 +135,7 @@
         </div>
 
         <div class="text-end">
-            <h6>Total prep and labeling fees: <strong>$0.00</strong></h6>
+            <h6 class="d-none">Total prep and labeling fees: <strong>$0.00</strong></h6>
             <button class="btn btn-primary" onclick="saveShipingPlan()">Confirm and continue</button>
         </div>
         </div>
@@ -188,7 +188,7 @@
                         <label for="modal_use_orignal_box" class="form-label mb-0">Use Original Box</label>
                     </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-3">
                         <label for="labelingBy" class="form-label">Weight Per Case</label>
                         <input class="form-control" id="weightPerCase" type="number" step="0.01">
@@ -197,7 +197,7 @@
                         <label for="labelingBy" class="form-label">Total Weight</label>
                         <input class="form-control" id="totalWeight" type="number" step="0.01">
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -271,7 +271,7 @@
                         <label for="modal_use_orignal_box" class="form-label mb-0">Use Original Box</label>
                     </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-3">
                         <label for="labelingBy" class="form-label">Weight Per Case</label>
                         <input class="form-control" id="weightPerCase" type="number" step="0.01">
@@ -280,7 +280,7 @@
                         <label for="labelingBy" class="form-label">Total Weight</label>
                         <input class="form-control" id="totalWeight" type="number" step="0.01">
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -425,17 +425,12 @@
                     <td>
                         <span id="box_weight${item.id}"></span>
                     </td>
-                    <td>
-                        <span id="costTotal${item.id}"></span>
-                    </td>
+                   
                     <td>
                         <span id="totalWeight${item.id}"></span>
                     </td>
                     
-                    <td>
-                        <div>Prep required: ${item.prep || 'None'}</div>
-                        <div>Labeling: By seller – <a href="#">Print SKU labels</a></div>
-                    </td>
+                   
                     <td>
                         <div class="row mb-2">
                             <div class="col-6">
@@ -447,13 +442,13 @@
                                 <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" readonly>
                             </div>
                         </div>
-                        <div>
+                        <div class="d-none">
                             <label class="form-label">Expiration</label>
                             <input type="date" class="form-control" name="expiration[${item.id}]">
                         </div>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id}, ${item.id})">
+                        <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id})">
                             Save
                         </button>
                     </td>
@@ -479,7 +474,7 @@
 
         // 👉 TODO: perform your action here (filter table, redirect, etc.)
     }
-    function loadPackingTemplates(productId) {
+    function loadPackingTemplates(productId,selectedVal=0) {
         $.ajax({
             url: `/packing-templates/${productId}`,
             type: 'GET',
@@ -487,12 +482,12 @@
                 const $select = $('#templateType' + productId);
                 $select.empty();
                 templates.forEach(function(template) {
-                    
                     // Add template to select dropdown
                     $select.append(
                         $('<option>', {
                             value: template.id,
-                            text: template.template_name
+                            text: template.template_name,
+                            selected: selectedVal != 0 && selectedVal == template.id // select if matches selectedVal
                         })
                     );
                 });
@@ -503,10 +498,18 @@
                     $select.append(`<option value="new_template">Create new packing template</option>`);
                 }
                 // If at least one template exists, apply its data immediately
-                if (templates.length > 0) {
-                    const firstTemplate = templates[0];
-                    applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                if(selectedVal == 0){
+                    if (templates.length > 0) {
+                        const firstTemplate = templates[0];
+                        applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                    }
+                }else{
+                    if (templates.length > 0) {
+                        const firstTemplate = templates.find(t => t.id == selectedVal) || templates[0];
+                        applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                    }
                 }
+
             },
             error: function(err) {
                 console.error('Error loading templates:', err);
@@ -559,6 +562,10 @@
                 $('#unitsPerBox').trigger('focus');
             })
             .modal('show');
+        }else if (selectedVal === 'individual_units') {
+           
+        }else{
+            loadPackingTemplates(productId,selectedVal);
         }
     }
     $('#packingTemplateModal').on('shown.bs.modal', function () {
@@ -663,10 +670,13 @@
         if (template.box_weight && template.units_per_box) {
             totalCost = parseFloat(template.box_weight) * parseInt(template.units_per_box);
         }
-        $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
+        // $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
         const boxes = $(`input[name="boxes[${itemId}]"]`).val() || 0;
         const totalWeight = boxes * (template.box_weight || 0);
-        $(`#totalWeight${itemId}`).text(totalWeight ? totalWeight.toFixed(2) : '');
+        $(`#totalWeight${itemId}`).text(totalWeight.toFixed(2));
+        boxcunt = $(`input[name="boxes[${itemId}]"]`).val();
+        unitsnew = boxcunt * template.units_per_box;
+        $(`input[name="units[${itemId}]"]`).val(unitsnew);
     }
     $(document).on('input', 'input[name^="boxes["]', function () {
         const boxInput = $(this);
@@ -679,17 +689,21 @@
 
         const unitInput = $(`input[name="units[${itemId}]"]`);
         unitInput.val(boxCount * unitsPerBox);
+        var box_weight = parseFloat($(`#box_weight${itemId}`).text()) || 0;
+        var totalWeight = box_weight * boxCount;
+        $(`#totalWeight${itemId}`).text(totalWeight.toFixed(2));
+        
     });
-    function saveProductData(itemId, productId) {
+    function saveProductData(itemId) {
         const boxes = $(`input[name="boxes[${itemId}]"]`).val();
         const units = $(`input[name="units[${itemId}]"]`).val();
         const expiration = $(`input[name="expiration[${itemId}]"]`).val();
         const templateType = $(`#templateType${itemId}`).val();
-        const costTotal = $(`#costTotal${itemId}`).text();
+        const costTotal = 0.0;
         const ship_plan_id = $(`#ship_plan_id`).val();
 
         const data = {
-            product_id: productId,
+            product_id: itemId,
             item_id: itemId,
             boxes: boxes,
             units: units,

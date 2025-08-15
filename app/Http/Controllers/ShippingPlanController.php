@@ -102,10 +102,9 @@ class ShippingPlanController extends Controller
     {
         $productId = $request->product_id;
 
-
+        $shippingPlan = ShipPlan::where('custom_id',$request->ship_plan_id)->first();
         // Example: shipping_plan_products
         $deleted = ShipPlanDetail::where('id', $id)
-        ->where('product_id', $productId)
         ->delete();
 
         if ($deleted) {
@@ -113,5 +112,16 @@ class ShippingPlanController extends Controller
         }
 
         return response()->json(['success' => false], 400);
+    }
+    public function getAllShipPlans(){
+        $shipPlans = ShipPlan::with('creator')->get();
+        return response()->json($shipPlans);
+    }
+    public function moveITem(Request $request){
+        $item = ShipPlanDetail::findOrFail($request->item_id);
+        $item->ship_plan_id = $request->target_plan_id;
+        $item->save();
+
+        return response()->json(['success' => true, 'message' => 'Item moved successfully']);
     }
 }

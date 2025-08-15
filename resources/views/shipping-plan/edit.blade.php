@@ -37,7 +37,7 @@
         </ul>
 
         <div class="row g-3">
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
                 <label class="form-label d-block mb-2">SKU Selection Method</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="sku_method" value="list" id="skuList" {{ $shippingPlan->sku_method == 'list'?'checked':''  }} >
@@ -48,25 +48,44 @@
                     <label class="form-check-label" for="skuFile">File upload</label>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label class="form-label">Ship From</label>
                     <span>Favorite Commodities Inc, 3320 LAWSON BLVD, OCEANSIDE, NY, 11572, US</span>
                 <a href="#" class="small">Ship from another address</a>
+                <div class="row">
+                    <div class="col-md-6">
+                            <label class="form-label">Marketplace destination</label>
+                            <select class="form-select" name="market_place" id="market_place">
+                            <option value="us" selected>United States</option>
+                            <option value="ca" >Canada</option>
+                            </select>
+                    </div>
+                    <div class="col-md-6">
+                    <label class="form-label">Fulfillment capability</label>
+                        <select class="form-select" name="fullment_capability" id="fullment_capability">
+                        <option value="full_fillment" value="{{ $shippingPlan->full_fillment??'' }}">Standard Fulfillment by Amazon</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Marketplace destination</label>
-                <select class="form-select" name="market_place" id="market_place">
-                <option value="us" selected>United States</option>
-                <option value="ca" >Canada</option>
-                </select>
+            <div class="col-md-6">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Total Weight (lb)</th>
+                            <th>Total Boxes</th>
+                            <th>Total Units</th>
+                        </tr>
+                    <tr>
+                    <th id="footerTotalWeight">0</th>
+                    <th id="footerBoxes">0</th>
+                    <th id="footerUnits">0</th>
+                </tr>
+                </table>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Fulfillment capability</label>
-                <select class="form-select" name="fullment_capability" id="fullment_capability">
-                <option value="full_fillment" value="{{ $shippingPlan->full_fillment??'' }}">Standard Fulfillment by Amazon</option>
-                </select>
-            </div>
-            <div class="col-md-2">
+            
+            
+            <div class="col-md-2 d-none">
                  <label for="">Filter</label>
                 <div class="form-check ">
                    
@@ -85,8 +104,8 @@
       </div>
     </div>
     <div class="row mt-2 mb-2">
-        <div class="col-md-6"></div>
-        <div class="col-md-6">
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
             <div class="row">
                 <div class="col-md-4"></div>
                 <div class="col-md-8 text-end">
@@ -103,7 +122,7 @@
     <div class="card">
         
 
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center d-none">
             <div>
                     <strong>Lower your storage fees by up to 84%</strong>
                     <p>
@@ -120,15 +139,15 @@
             <table class="table table-bordered align-middle" id="productTable">
             <thead class="table-light">
                 <tr>
+                <th>#No</th>
                 <th>SKU</th>
                 <th>Packing Details</th>
                 <th>Units per box</th>
                 <th>Box dimensions (inch)</th>
                 <th>Use Original Box </th>
                 <th>Box weight (lb) </th>
-                <th>Total Cost </th>
+                {{-- <th>Total Cost </th> --}}
                 <th>Total Weight </th>
-                <th>Information/Action</th>
                 <th>Quantity to Send</th>
                 <th>Actions</th>
                 </tr>
@@ -139,8 +158,8 @@
             </table>
         </div>
 
-        <div class="text-end">
-            <h6>Total prep and labeling fees: <strong>$0.00</strong></h6>
+        <div class="text-end ">
+            <h6 class="d-none">Total prep and labeling fees: <strong>$0.00</strong></h6>
             <button class="btn btn-primary" onclick="saveShipingPlan()">Confirm and continue</button>
         </div>
         </div>
@@ -193,7 +212,7 @@
                         <label for="modal_use_orignal_box" class="form-label mb-0">Use Original Box</label>
                     </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-3">
                         <label for="labelingBy" class="form-label">Weight Per Case</label>
                         <input class="form-control" id="weightPerCase" type="number" step="0.01">
@@ -202,7 +221,7 @@
                         <label for="labelingBy" class="form-label">Total Weight</label>
                         <input class="form-control" id="totalWeight" type="number" step="0.01">
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -276,7 +295,7 @@
                         <label for="modal_use_orignal_box" class="form-label mb-0">Use Original Box</label>
                     </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-3">
                         <label for="labelingBy" class="form-label">Weight Per Case</label>
                         <input class="form-control" id="weightPerCase" type="number" step="0.01">
@@ -285,7 +304,7 @@
                         <label for="labelingBy" class="form-label">Total Weight</label>
                         <input class="form-control" id="totalWeight" type="number" step="0.01">
                     </div>
-                </div>
+                </div> --}}
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -311,6 +330,32 @@
         </div>
     </div>
 </div>
+<!-- Move to Another Shipping Plan Modal -->
+<div class="modal fade" id="movePlanModal" tabindex="-1" aria-labelledby="movePlanModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="movePlanModalLabel">Move to Another Shipping Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <input type="hidden" name="itemIdNew" id="itemIdNew">
+            <input type="hidden" name="productIdMove" id="productIdMove">
+          <label for="shippingPlanSelect" class="form-label">Select Shipping Plan</label>
+          <select class="form-select" id="shippingPlanSelect">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmMovePlanBtn">Move</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 @section('script')
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -322,6 +367,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script>
+    var totalWEightGb = 0.0;
     $(document).ready(function () {
         const ship_plan_id_g = $(`#ship_plan_id`).val();
         getOldITems(ship_plan_id_g);
@@ -386,6 +432,7 @@
                 alert("Product already added.");
                 return;
             }
+            let rowNumber = $('#productTable tbody tr').length + 1;
             let product_id = null;
             let template_name = '';
             let template_type = '';
@@ -400,6 +447,9 @@
             // Append to table
             $('#productTable tbody').append(`
                 <tr id="product-row-${item.id}">
+                    <td>
+                        <span class="row-no">${rowNumber}</span>
+                    </td>
                     <td>
                         <strong>${item.item}</strong><br>
                         SKU: ${item.msku}<br>
@@ -431,17 +481,13 @@
                     <td>
                         <span id="box_weight${item.id}"></span>
                     </td>
-                    <td>
-                        <span id="costTotal${item.id}"></span>
-                    </td>
-                    <td>
-                        <span id="totalWeight${item.id}"></span>
-                    </td>
                     
                     <td>
-                        <div>Prep required: ${item.prep || 'None'}</div>
-                        <div>Labeling: By seller – <a href="#">Print SKU labels</a></div>
+                        <span id="totalWeight${item.id}"></span>
+                        
                     </td>
+                    
+                    
                     <td>
                         <div class="row mb-2">
                             <div class="col-6">
@@ -453,13 +499,13 @@
                                 <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" readonly>
                             </div>
                         </div>
-                        <div>
+                        <div class="d-none">
                             <label class="form-label">Expiration</label>
                             <input type="date" class="form-control" name="expiration[${item.id}]">
                         </div>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id}, ${item.id})">
+                        <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id})">
                             Save
                         </button>
                     </td>
@@ -485,7 +531,8 @@
 
         // 👉 TODO: perform your action here (filter table, redirect, etc.)
     }
-    function loadPackingTemplates(productId) {
+    function loadPackingTemplates(productId,selectedVal=0) {
+        // console.log(selectedVal);
         $.ajax({
             url: `/packing-templates/${productId}`,
             type: 'GET',
@@ -493,12 +540,12 @@
                 const $select = $('#templateType' + productId);
                 $select.empty();
                 templates.forEach(function(template) {
-                    
                     // Add template to select dropdown
                     $select.append(
                         $('<option>', {
                             value: template.id,
-                            text: template.template_name
+                            text: template.template_name,
+                            selected: selectedVal != 0 && selectedVal == template.id // select if matches selectedVal
                         })
                     );
                 });
@@ -509,10 +556,18 @@
                     $select.append(`<option value="new_template">Create new packing template</option>`);
                 }
                 // If at least one template exists, apply its data immediately
-                if (templates.length > 0) {
-                    const firstTemplate = templates[0];
-                    applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                if(selectedVal == 0){
+                    if (templates.length > 0) {
+                        const firstTemplate = templates[0];
+                        applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                    }
+                }else{
+                    if (templates.length > 0) {
+                        const firstTemplate = templates.find(t => t.id == selectedVal) || templates[0];
+                        applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                    }
                 }
+
             },
             error: function(err) {
                 console.error('Error loading templates:', err);
@@ -565,6 +620,10 @@
                 $('#unitsPerBox').trigger('focus');
             })
             .modal('show');
+        }else if (selectedVal === 'individual_units') {
+           
+        }else{
+            loadPackingTemplates(productId,selectedVal);
         }
     }
     $('#packingTemplateModal').on('shown.bs.modal', function () {
@@ -669,11 +728,15 @@
         if (template.box_weight && template.units_per_box) {
             totalCost = parseFloat(template.box_weight) * parseInt(template.units_per_box);
         }
-        $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
-        // Calculate total weight: boxes * box_weight
+        // $(`#costTotal${itemId}`).text(totalCost ? totalCost.toFixed(2) : '');
         const boxes = $(`input[name="boxes[${itemId}]"]`).val() || 0;
         const totalWeight = boxes * (template.box_weight || 0);
-        $(`#totalWeight${itemId}`).text(totalWeight ? totalWeight.toFixed(2) : '');
+        totalWEightGb += totalWeight || 0; // Ensure totalWeight is a number
+       $('#footerTotalWeight').text(totalWEightGb.toFixed(2));
+        $(`#totalWeight${itemId}`).text(totalWeight.toFixed(2));
+        boxcunt = $(`input[name="boxes[${itemId}]"]`).val();
+        unitsnew = boxcunt * template.units_per_box;
+        $(`input[name="units[${itemId}]"]`).val(unitsnew);
     }
     $(document).on('input', 'input[name^="boxes["]', function () {
         const boxInput = $(this);
@@ -686,19 +749,23 @@
 
         const unitInput = $(`input[name="units[${itemId}]"]`);
         unitInput.val(boxCount * unitsPerBox);
+        var box_weight = parseFloat($(`#box_weight${itemId}`).text()) || 0;
+        var totalWeight = box_weight * boxCount;
+        $(`#totalWeight${itemId}`).text(totalWeight.toFixed(2));
+        
     });
-    function saveProductData(itemId, productId) {
-        const boxes = $(`input[name="boxes[${itemId}]"]`).val();
+    function saveProductData( productId) {
+        const boxes = $(`input[name="boxes[${productId}]"]`).val();
         console.log(boxes);
-        const units = $(`input[name="units[${itemId}]"]`).val();
-        const expiration = $(`input[name="expiration[${itemId}]"]`).val();
-        const templateType = $(`#templateType${itemId}`).val();
-        const costTotal = $(`#costTotal${itemId}`).text();
+        const units = $(`input[name="units[${productId}]"]`).val();
+        const expiration = $(`input[name="expiration[${productId}]"]`).val();
+        const templateType = $(`#templateType${productId}`).val();
+        const costTotal = 0.00;
         const ship_plan_id = $(`#ship_plan_id`).val();
 
         const data = {
             product_id: productId,
-            item_id: itemId,
+            item_id: productId,
             boxes: boxes,
             units: units,
             expiration: expiration,
@@ -717,6 +784,7 @@
             data: data,
             success: function(response) {
                 toastr.success("Saved successfully!");
+                getOldITems(ship_plan_id);
             },
             error: function(err) {
                 toastr.error("Failed to save.");
@@ -757,80 +825,99 @@
         });
     }
     function appendShippingPlanItem(item) {
-        // Prevent duplicate rows
-        if ($('#product-row-' + item.id).length) return;
-
-        $('#productTable tbody').append(`
-            <tr id="product-row-${item.id}">
-                <td>
-                    <strong>${item.product?.item || item.item}</strong><br>
-                    SKU: ${item.product?.msku || item.msku}<br>
-                    ASIN: ${item.product?.asin || item.asin}<br>
-                    FNSKU: ${item.product?.fnsku || item.fnsku}<br>
-                </td>
-                <td>
-                    <div class="mb-3">
-                        <label for="templateType" class="form-label">Template type</label>
-                        <select class="form-select" id="templateType${item.product_id}" name="templateType${item.product_id}" onchange="createNewTemp(${item.product_id})">
-                        <option value="case_pack">Case pack</option>
-                        <option value="individual_units">Individual units</option>
-                        </select>
-                        <button id="editPacking${item.product_id}" onclick="editTemplate(${item.product_id})" type="button" class="btn btn-outline-secondary" title="Edit Packing Template">
-                            Edit
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                    </div>    
-                </td>
-                <td><span id="perPiece${item.product_id}"></span></td>
-                <td><span id="dimensions${item.product_id}"></span></td>
-                <td><span id="original_pack${item.product_id}"></span></td>
-                <td><span id="box_weight${item.product_id}"></span></td>
-                <td><span id="costTotal${item.product_id}"></span></td>
-                <td><span id="totalWeight${item.product_id}"></span></td>
-                <td>
-                    <div>Prep required: ${item.prep || 'None'}</div>
-                    <div>Labeling: By seller – <a href="#">Print SKU labels</a></div>
-                </td>
-                <td>
-                    <div class="row mb-2">
-                        <div class="col-6">
-                            <label class="form-label">Boxes</label>
-                            <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.product_id}]" value="${item.boxes || ''}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Units</label>
-                            <input type="number" class="form-control form-control-sm" min="0" name="units[${item.id}]" value="${item.units || ''}" readonly>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">Expiration</label>
-                        <input type="date" class="form-control" name="expiration[${item.id}]" value="${item.expiration || ''}">
-                    </div>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-success btn-sm" onclick="saveProductData(${item.id}, ${item.product_id || item.id})">
-                        Save
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteProcut(${item.id}, ${item.product_id || item.id})">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        `);
-
-        // Load templates for that product
-        loadPackingTemplates(item.product.id);
+       
     }
     function getOldITems(custom_id){
+        var totalWEightGb = 0;
+        var totalBoxes = 0;
+        var totalUnits = 0;
+        $('#productTable tbody').empty();
         $.ajax({
             url: `{{ url('/get-shipping-plan-items/${custom_id} ') }}`, // Your backend route
             method: 'GET',
+            async:false,
             success: function(response) {
+                totalWeight = 0;
+                totalBoxes = 0;
+                totalUnits = 0;
                 response.forEach(function(item) {
-                    appendShippingPlanItem(item);
+                    // appendShippingPlanItem(item);
+                    totalBoxes += item.boxes || 0;
+                    totalUnits += item.units || 0;
+                    // Prevent duplicate rows
+                    if ($('#product-row-' + item.product.id).length) return;
+                    $('#productTable tbody').append(`
+                        <tr id="product-row-${item.product.id}">
+                            <td>
+                                <span class="row-no">${$('#productTable tbody tr').length + 1}</span>
+                            <td>
+                                <strong>${item.product?.item || item.item}</strong><br>
+                                SKU: ${item.product?.msku || item.msku}<br>
+                                ASIN: ${item.product?.asin || item.asin}<br>
+                                FNSKU: ${item.product?.fnsku || item.fnsku}<br>
+                            </td>
+                            <td>
+                                <div class="mb-3">
+                                    <label for="templateType" class="form-label">Template type
+                                    <button id="editPacking${item.product.id}" onclick="editTemplate(${item.product.id})" type="button" class="btn btn-sm btn-outline-secondary" title="Edit Packing Template">
+                                        Edit
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>    
+                                    </label>
+                                    <select class="form-select" id="templateType${item.product.id}" name="templateType${item.product.id}" onchange="createNewTemp(${item.product.id})">
+                                    <option value="case_pack">Case pack</option>
+                                    <option value="individual_units">Individual units</option>
+                                    </select>
+                                    
+                                </div>    
+                            </td>
+                            <td><span id="perPiece${item.product.id}"></span></td>
+                            <td><span id="dimensions${item.product.id}"></span></td>
+                            <td><span id="original_pack${item.product.id}"></span></td>
+                            <td><span id="box_weight${item.product.id}"></span></td>
+                            
+                            <td><span id="totalWeight${item.product.id}"></span></td>
+                        
+                            <td>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label class="form-label">Boxes</label>
+                                        <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.product.id}]" value="${item.boxes || ''}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Units</label>
+                                        <input type="number" class="form-control form-control-sm" min="0" name="units[${item.product.id}]" value="${item.units || ''}" readonly>
+                                    </div>
+                                </div>
+                                <div class="d-none">
+                                    <label class="form-label">Expiration</label>
+                                    <input type="date" class="form-control" name="expiration[${item.product.id}]" value="${item.expiration || ''}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-success" onclick="saveProductData(${item.product.id})">
+                                            Save
+                                        </button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteProcut(${item.id})">
+                                            Delete
+                                        </button>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="openMovePlanModal(${item.id},${item.product.id})">
+                                        Move to Another Shipping Plan
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                    // Load templates for that product
+                    loadPackingTemplates(item.product.id,item.template);
                 });
             }
         });
+        updateTableFooterTotals(totalUnits,totalWeight,totalBoxes)
+        
     }
     function deleteShippingPlan(id){
         if (!confirm('Are you sure you want to delete this shipping plan?')) {
@@ -851,20 +938,22 @@
             }
         });
     }
-    function deleteProcut(id, product_id){
+    function deleteProcut(product_id){
         if (!confirm('Are you sure you want to delete this product from the shipping plan?')) {
             return;
         }
+        const ship_plan_id = $(`#ship_plan_id`).val();
         $.ajax({
-            url: `{{ url('/shipping-plans/${id}/delete-product') }}`,
+            url: `{{ url('/shipping-plans/${product_id}/delete-product') }}`,
             type: 'DELETE',
             data: {
                 _token: '{{ csrf_token() }}',
-                product_id: product_id
+                product_id: product_id,
+                ship_plan_id:ship_plan_id,
             },
             success: function (response) {
                 toastr.success('Product deleted successfully');
-                getOldITems(ship_plan_id_g);
+                getOldITems(ship_plan_id);
             },
             error: function (xhr) {
                 toastr.error('Error deleting product');
@@ -908,6 +997,94 @@
 
     document.getElementById('editUnitsPerBox').addEventListener('input', updateTemplateNameEdit);
     document.getElementById('editTemplateType').addEventListener('change', updateTemplateNameEdit);
+    function updateTableFooterTotals(totalUnits = 0, totalWeight = 0, totalBoxes = 0) {
+
+    $('#footerTotalWeight').text(totalWeight.toFixed(2));
+    $('#footerBoxes').text(totalBoxes);
+    $('#footerUnits').text(totalUnits);
+}
+
+    let currentItemId = null;
+    function openMovePlanModal(itemId,prodcutId) {
+        currentItemId = itemId;
+        $("#itemIdNew").val(itemId);
+        $("#productIdMove").val(prodcutId);
+        let $select = $('#shippingPlanSelect');
+        const ship_plan_id_g_2 = $(`#ship_plan_id`).val();
+        // Reset dropdown
+        $select.html('<option value="">Loading...</option>');
+
+        // Load shipping plans via AJAX
+        $.ajax({
+            url: `{{ url('shipping-plans-all') }}` , // Change this to your real endpoint
+            method: 'GET',
+            dataType: 'json',
+            success: function(plans) {
+                $select.empty();
+                if (plans.length === 0) {
+                    $select.append('<option value="">No plans available</option>');
+                } else {
+                    plans.forEach(plan => {
+                        let date = new Date(plan.created_at);
+
+                        let year = date.getFullYear();
+                        let month = String(date.getMonth() + 1).padStart(2, '0');
+                        let day = String(date.getDate()).padStart(2, '0');
+
+                        let hours = date.getHours();
+                        let minutes = String(date.getMinutes()).padStart(2, '0');
+                        let ampm = hours >= 12 ? 'PM' : 'AM';
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; // 0 becomes 12
+
+                        let formattedDate = `${year}-${month}-${day} ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+                        if(ship_plan_id_g_2 !== plan.custom_id){
+                            $select.append(
+                                `<option value="${plan.id}">${plan.custom_id} — ${formattedDate}</option>`
+                            );
+                        }
+                    
+                    });
+                }
+            },
+            error: function() {
+                $select.html('<option value="">Error loading plans</option>');
+            }
+        });
+
+        // Show modal
+        $('#movePlanModal').modal('show');
+    }
+    $("#confirmMovePlanBtn").on("click", function() {
+        let targetPlanId = $("#shippingPlanSelect").val();
+        let productIdMove = $("#productIdMove").val();
+        let itemIdNew = $("#itemIdNew").val();
+
+        if (!targetPlanId) {
+            alert("Please select a shipping plan.");
+            return;
+        }
+
+        $.ajax({
+            url: `{{ url('shipping-plans/move-item') }}`,
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            data: {
+                item_id: itemIdNew,
+                target_plan_id: targetPlanId
+            },
+            success: function(response) {
+                $("#movePlanModal").modal("hide");
+                $("#product-row-" + productIdMove).remove(); // Remove from current table
+                alert("Item moved successfully!");
+            },
+            error: function() {
+                alert("Failed to move item.");
+            }
+        });
+    });
 
 
 </script>

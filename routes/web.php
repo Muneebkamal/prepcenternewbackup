@@ -154,6 +154,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/shipping-plans/{id}', [ShippingPlanController::class, 'destroy'])->name('shipping-plans.destroy');
     Route::delete('/shipping-plans/{id}/delete-product', [ShippingPlanController::class, 'deleteProduct'])
     ->name('shipping-plans.delete-product');
+    Route::get('/shipping-plans-all', [ShippingPlanController::class, 'getAllShipPlans'])
+    ->name('get.shipping-plan');
+    Route::post('/shipping-plans/move-item', [ShippingPlanController::class, 'moveITem'])
+    ->name('moveITem.shipping-plan');
 
 
 });
