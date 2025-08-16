@@ -31,6 +31,8 @@ class ShippingPlanController extends Controller
        $data = $request->validate([
             'custom_id' => 'required',
             'sku_method' => 'nullable|string',
+            'shipment_fee' => 'nullable|numeric',
+            'handling_cost' => 'nullable|numeric',
             'fullment_capability' => 'nullable|string',
             'market_place' => 'nullable|string',
             'show_filter' => 'nullable|boolean',
@@ -47,6 +49,8 @@ class ShippingPlanController extends Controller
                 'fullment_capability' => $data['fullment_capability'] ?? '',
                 'market_place' => $data['market_place'] ?? '',
                 'show_filter' => $data['show_filter'] ?? 0,
+                'handling_cost' => $data['handling_cost'] ?? 0,
+                'shipment_fee' => $data['shipment_fee'] ?? 0,
                 'created_by' => $created_by,
             ]
         );

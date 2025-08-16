@@ -70,17 +70,59 @@
             </div>
             <div class="col-md-6">
                 <table class="table table-bordered align-middle">
-                    <thead>
+                    <tbody>
                         <tr>
-                            <th>Total Weight (lb)</th>
-                            <th>Total Boxes</th>
-                            <th>Total Units</th>
+                            <td><strong>Total Units</strong></td>
+                            <td id="footerUnits">10</td>
                         </tr>
-                    <tr>
-                    <th id="footerTotalWeight">0</th>
-                    <th id="footerBoxes">0</th>
-                    <th id="footerUnits">0</th>
-                </tr>
+                        <tr>
+                            <td><strong>Total Boxes</strong></td>
+                            <td id="footerBoxes">0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Weight (lb)</strong></td>
+                            <td id="footerTotalWeight">0</td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>Handling Fee</strong></td>
+                            <td>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" name="handling_fee" id="handlingFee" 
+                                        class="form-control" step="0.01" 
+                                        value="{{ number_format($shippingPlan->handling_cost, 2, '.', '') }}">
+                                </div>
+                                <div class="small text-muted">Per Item: <span id="perItemHandling">0.00</span></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Shipment Cost</strong></td>
+                            <td>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" id="shippingCost" name="shipment_cost" 
+                                        class="form-control" step="0.01" 
+                                        value="{{ number_format($shippingPlan->shipment_fee, 2, '.', '') }}">
+                                </div>
+                                <div class="small text-muted">Per Item: <span id="perItemShipping">0.00</span></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Charges</strong></td>
+                            <td><strong id="totalCost">0.00</strong> 
+                                {{-- <div class="small text-muted">Per Item: <span id="totalPerItem">0.00</span></div> --}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost per Unit </strong></td>
+                            <td><strong id="totalPerItem">0.00</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost per Lb</strong></td>
+                            <td><strong id="costPerLb"><span id="totalPerItem">0.00</span></strong></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             
@@ -160,7 +202,7 @@
 
         <div class="text-end ">
             <h6 class="d-none">Total prep and labeling fees: <strong>$0.00</strong></h6>
-            <button class="btn btn-primary" onclick="saveShipingPlan()">Confirm and continue</button>
+            <button class="btn btn-primary d-none" onclick="saveShipingPlan()">Confirm and continue</button>
         </div>
         </div>
     </div>
@@ -371,6 +413,9 @@
     $(document).ready(function () {
         const ship_plan_id_g = $(`#ship_plan_id`).val();
         getOldITems(ship_plan_id_g);
+        setInterval(() => {
+            calculate();
+        }, 1000);
         $('#skuSearchInput').select2({
             placeholder: 'Search SKU, ASIN, or Name...',
             allowClear: true,
@@ -797,12 +842,16 @@
         const market_place = $('#market_place').val();
         const show_filter = $('#show_filter').is(":checked")?1:0;
         const ship_plan_id = $(`#ship_plan_id`).val();
+        const handling_cost = $(`#handlingFee`).val();
+        const shipment_fee = $(`#shippingCost`).val();
         const data = {
             custom_id:ship_plan_id,
             sku_method: sku_method,
             fullment_capability: fullment_capability,
             market_place: market_place,
             show_filter: show_filter,
+            handling_cost:handling_cost,
+            shipment_fee:shipment_fee,
         };
 
         // Optional: Send to server via AJAX
@@ -1085,7 +1134,33 @@
             }
         });
     });
+    function calculate() {
+        var totalUnits = parseInt($("#footerUnits").text()) || 0;
+        var footerTotalWeight = parseInt($("#footerTotalWeight").text()) || 0;
 
+        var handlingFee = parseFloat($("#handlingFee").val()) || 0;
+        var shippingCost = parseFloat($("#shippingCost").val()) || 0;
+
+        var perItemHandling = (totalUnits > 0) ? (handlingFee / totalUnits) : 0;
+        var perItemShipping = (totalUnits > 0) ? (shippingCost / totalUnits) : 0;
+        var costPerLb = (totalUnits > 0) ? (footerTotalWeight / totalUnits) : 0;
+
+        $("#perItemHandling").text("$" + perItemHandling.toFixed(2));
+        $("#perItemShipping").text("$" + perItemShipping.toFixed(2));
+
+        var totalCost = handlingFee + shippingCost;
+        $("#totalCost").html("<strong>$" + totalCost.toFixed(2) + "</strong>");
+
+        $("#totalPerItem").html("<strong>$" + (perItemHandling + perItemShipping).toFixed(2) + "</strong>");
+        $("#costPerLb").html("<strong>$" + (costPerLb).toFixed(2) + "</strong>");
+    }
+
+
+    $("#handlingFee, #shippingCost").on("input", calculate);
+    $(document).on("blur", "#handlingFee, #shippingCost", function () {
+        let val = parseFloat($(this).val()) || 0;
+        $(this).val(val.toFixed(2));
+    });
 
 </script>
 @endsection

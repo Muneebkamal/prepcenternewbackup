@@ -22,6 +22,8 @@ return new class extends Migration
             $table->boolean('show_filter')->default(0);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
+            $table->double('handling_cost')->default(0);
+            $table->double('shipment_fee')->default(0);
             $table->softDeletes(); // For soft delete functionality
             $table->timestamps();
         });

@@ -16,7 +16,9 @@ class ShipPlan extends Model
         'market_place',
         'show_filter',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'handling_cost',
+        'shipment_fee',
     ];
     public function creator()
     {
