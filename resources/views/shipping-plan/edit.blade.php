@@ -73,7 +73,7 @@
                     <tbody>
                         <tr>
                             <td><strong>Total Units</strong></td>
-                            <td id="footerUnits">10</td>
+                            <td id="footerUnits">0</td>
                         </tr>
                         <tr>
                             <td><strong>Total Boxes</strong></td>
@@ -203,6 +203,12 @@
         <div class="text-end ">
             <h6 class="d-none">Total prep and labeling fees: <strong>$0.00</strong></h6>
             <button class="btn btn-primary d-none" onclick="saveShipingPlan()">Confirm and continue</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="printProductTable()">
+                Print Table
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="exportShippingPlanExcel()">
+                Export Excel
+            </button>
         </div>
         </div>
     </div>
@@ -410,8 +416,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script>
     var totalWEightGb = 0.0;
+    const assetBaseUrl = "{{ asset('') }}/";
+    const ship_plan_id_g = $(`#ship_plan_id`).val();
     $(document).ready(function () {
-        const ship_plan_id_g = $(`#ship_plan_id`).val();
+       
         getOldITems(ship_plan_id_g);
         setInterval(() => {
             calculate();
@@ -496,10 +504,20 @@
                         <span class="row-no">${rowNumber}</span>
                     </td>
                     <td>
-                        <strong>${item.item}</strong><br>
-                        SKU: ${item.msku}<br>
-                        ASIN: ${item.asin}<br>
-                        FNSKU: ${item.fnsku}<br>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="${item.image 
+                                ? `${assetBaseUrl}${item.image}` 
+                                : 'https://www.shutterstock.com/shutterstock/photos/2311073121/display_1500/stock-vector-no-photo-thumbnail-graphic-element-no-found-or-available-image-in-the-gallery-or-album-flat-2311073121.jpg'}" 
+                                alt="${item.item}" 
+                                class="img-thumbnail" 
+                                style="width: 50px; height: 50px; object-fit: contain;margin-bottom:auto;">
+                            <div>
+                                <strong>${item.item}</strong><br>
+                                SKU: ${item.msku}<br>
+                                ASIN: ${item.asin}<br>
+                                FNSKU: ${item.fnsku}<br>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <div class="mb-3">
@@ -537,7 +555,7 @@
                         <div class="row mb-2">
                             <div class="col-6">
                                 <label class="form-label">Boxes</label>
-                                <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.id}]">
+                                <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.id}]" data-id="${item.id}" onchange="saveProductData(${item.id})">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Units</label>
@@ -560,6 +578,9 @@
             loadPackingTemplates(item.id)
             // Optional: clear selection after append
             $('#skuSearchInput').val(null).trigger('change');
+            setTimeout(() => {
+                saveProductData(item.id); // Save immediately after adding
+            }, 1000);
         });
     });
     function searchSku() {
@@ -669,6 +690,9 @@
            
         }else{
             loadPackingTemplates(productId,selectedVal);
+            setTimeout(() => {
+               saveProductData(productId)
+            }, 1000); // Delay to ensure select2 has updated
         }
     }
     $('#packingTemplateModal').on('shown.bs.modal', function () {
@@ -828,7 +852,7 @@
             method: 'POST',
             data: data,
             success: function(response) {
-                toastr.success("Saved successfully!");
+                // toastr.success("Saved successfully!");
                 getOldITems(ship_plan_id);
             },
             error: function(err) {
@@ -899,11 +923,22 @@
                         <tr id="product-row-${item.product.id}">
                             <td>
                                 <span class="row-no">${$('#productTable tbody tr').length + 1}</span>
+                            </td>
                             <td>
-                                <strong>${item.product?.item || item.item}</strong><br>
-                                SKU: ${item.product?.msku || item.msku}<br>
-                                ASIN: ${item.product?.asin || item.asin}<br>
-                                FNSKU: ${item.product?.fnsku || item.fnsku}<br>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="${item.product.image 
+                                        ? `${assetBaseUrl}${item.product.image}` 
+                                        : 'https://www.shutterstock.com/shutterstock/photos/2311073121/display_1500/stock-vector-no-photo-thumbnail-graphic-element-no-found-or-available-image-in-the-gallery-or-album-flat-2311073121.jpg'}" 
+                                        alt="${item.product?.item || item.item}" 
+                                        class="img-thumbnail" 
+                                        style="width: 50px; height: 50px; object-fit: contain;margin-bottom:auto;">
+                                    <div>
+                                        <strong>${item.product?.item || item.item}</strong><br>
+                                        SKU: ${item.product?.msku || item.msku}<br>
+                                        ASIN: ${item.product?.asin || item.asin}<br>
+                                        FNSKU: ${item.product?.fnsku || item.fnsku}<br>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 <div class="mb-3">
@@ -931,7 +966,7 @@
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label">Boxes</label>
-                                        <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.product.id}]" value="${item.boxes || ''}">
+                                        <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.product.id}]" value="${item.boxes || ''}" data-id="${item.product.id}" onchange="saveProductData(${item.product.id})">
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label">Units</label>
@@ -961,7 +996,7 @@
                         </tr>
                     `);
                     // Load templates for that product
-                    loadPackingTemplates(item.product.id,item.template);
+                    loadPackingTemplates(item.product.id,item.tempalte_id);
                 });
             }
         });
@@ -1161,6 +1196,166 @@
         let val = parseFloat($(this).val()) || 0;
         $(this).val(val.toFixed(2));
     });
+    function printProductTable(downloadExcel = true) {
+    $.ajax({
+        url: `/get-shipping-plan-items/${ship_plan_id_g}`,
+        method: 'GET',
+        success: function(response) {
+            let totalWeight = 0;
+            let totalUnits = 0;
+
+            let table = `
+                <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 14px; text-align: center;">
+                    <thead style="background-color: #f2f2f2;">
+                        <tr>
+                            <th>MSKU</th>
+                            <th>Title</th>
+                            <th>FNSKU</th>
+                            <th>ASIN</th>
+                            <th>Qty</th>
+                            <th>Qty/Case</th>
+                            <th>Carton</th>
+                            <th>Weight</th>
+                            <th>Total Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            response.forEach(function(item) {
+                const msku   = item.product.msku ?? '';
+                const asin   = item.product.asin ?? '';
+                const title  = item.product.item ?? '';
+                const fnsku  = item.product.fnsku ?? '';
+                const qty    = item.units ?? 0;
+                const boxes  = item.boxes ?? 0;
+                const weight = item.packing_template ? (item.packing_template.box_weight ?? 0) : 0;
+                const caseQty = item.packing_template ? (item.packing_template.units_per_box ?? 0) : 0;
+                const total  = (boxes * weight).toFixed(2);
+
+                totalUnits  += parseInt(qty);
+                totalWeight += parseFloat(total);
+
+                table += `
+                    <tr>
+                        <td >${msku}</td>
+                        <td text-align:left;">${title}</td>
+                        <td >${fnsku}</td>
+                        <td >${asin}</td>
+                        <td >${qty}</td>
+                        <td >${caseQty}</td>
+                        <td >${boxes}</td>
+                        <td >${weight}</td>
+                        <td >${total}</td>
+                    </tr>
+                `;
+            });
+
+            table += `
+                    </tbody>
+                    <tfoot style="font-weight: bold; background-color: #ddd;">
+                        <tr>
+                            <td colspan="4" style="padding: 6px;">Totals</td>
+                            <td style="padding: 6px;">${totalUnits}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="padding: 6px;">${totalWeight.toFixed(2)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+
+            if (downloadExcel) {
+                // Convert to Excel and download
+                let blob = new Blob([table], { type: "application/vnd.ms-excel" });
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement("a");
+                a.href = url;
+                a.download = "shipping_plan_items.xls";
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } else {
+                // Print
+                let printWindow = window.open('', '', 'width=900,height=700');
+                printWindow.document.write(table);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        },
+        error: function(xhr) {
+            console.error('Error fetching items:', xhr.responseText);
+        }
+    });
+}
+
 
 </script>
+<!-- Add SheetJS library -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+function exportShippingPlanExcel() {
+    $.ajax({
+        url: `/get-shipping-plan-items/${ship_plan_id_g}`,
+        method: 'GET',
+        success: function(response) {
+            // 🔹 Start Excel data
+            const workflow = [
+                ["Default prep owner", "Amazon"],
+                ["Default labeling owner", "Seller"],
+                [], // empty row
+                ["", "Optional", "", "", "Optional: Use only for case-packed SKUs"], // info row
+                [], // empty row
+                [
+                    "Merchant SKU",
+                    "Quantity",
+                    "Prep owner",
+                    "Labeling owner",
+                    "Expiration date (MM/DD/YYYY)",
+                    "Manufacturing lot code",
+                    "Units per box",
+                    "Number of boxes",
+                    "Box length (in)",
+                    "Box width (in)",
+                    "Box height (in)",
+                    "Box weight (lb)"
+                ]
+            ];
+
+            // 🔹 Fill rows with data from API
+            response.forEach(function(item) {
+                workflow.push([
+                    item.product?.msku ?? '',
+                    item.units ?? '',
+                    "", // Prep owner (can fill if you store it)
+                    "", // Labeling owner (can fill if you store it)
+                    item.expiration_date ?? '',
+                    item.lot_code ?? '',
+                    item.packing_template?.units_per_box ?? '',
+                    item.boxes ?? '',
+                    item.packing_template?.box_length ?? '',
+                    item.packing_template?.box_width ?? '',
+                    item.packing_template?.box_height ?? '',
+                    item.packing_template?.box_weight ?? ''
+                ]);
+            });
+
+            // 🔹 Build Workbook (one sheet only)
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(workflow);
+            XLSX.utils.book_append_sheet(wb, ws, "Workflow Template");
+
+            // 🔹 Export File
+            XLSX.writeFile(wb, "Workflow_Template.xlsx");
+        },
+        error: function(xhr) {
+            console.error('Error fetching items:', xhr.responseText);
+        }
+    });
+}
+
+
+</script>
+
 @endsection

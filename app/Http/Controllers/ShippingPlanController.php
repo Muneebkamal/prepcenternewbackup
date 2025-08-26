@@ -81,7 +81,7 @@ class ShippingPlanController extends Controller
         if( $item){
             $item->product_id = $request->product_id;
             $item->ship_plan_id = $request->ship_plan_id;
-            $item->template = is_numeric($request->template_type) ? $request->template_type : 0;
+            $item->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
             $item->units = $request->units;
             $item->boxes = $request->boxes;
             $item->expiration = $request->expiration;
@@ -90,7 +90,7 @@ class ShippingPlanController extends Controller
             $newItem =  new ShipPlanDetail;
             $newItem->product_id = $request->product_id;
             $newItem->ship_plan_id = $request->ship_plan_id;
-            $newItem->template = is_numeric($request->template_type) ? $request->template_type : 0;
+            $newItem->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
             $newItem->units = $request->units;
             $newItem->boxes = $request->boxes;
             $newItem->expiration = $request->expiration;
@@ -99,7 +99,7 @@ class ShippingPlanController extends Controller
 
     }
     public function getShippingItems($custom_id){
-        $items = ShipPlanDetail::where('ship_plan_id',$custom_id)->with('product')->get();
+        $items = ShipPlanDetail::where('ship_plan_id',$custom_id) ->with(['product', 'packingTemplate'])->get();
         return response()->json($items);
     }
     public function deleteProduct($id, Request $request)

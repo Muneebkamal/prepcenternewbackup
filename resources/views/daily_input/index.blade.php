@@ -56,14 +56,15 @@
                                 </div>
                                 <input type="hidden" id="date_range" name="date_range" />  
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <div class="mt-4 d-flex">
                                     <button type="submit" id="sub_btn" class="btn btn-primary me-2">Search</button>
-                                    <button type="button" class="btn btn-danger" id="resetButton">Clear</button>
+                                    <button type="button" class="btn btn-danger me-2" id="resetButton">Clear</button>
+                                    <button type="button" class="btn btn-secondary me-2 btn-sm" id="lastWeekBtn">Last Week</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="mt-3 ms-2">
                                 <input type="checkbox" id="productShowCheck" class="form-control-check" checked>
                                 <label for="productShowCheck">Show Product Record</label>
@@ -526,6 +527,22 @@
             document.body.removeChild(input);
         }
     }
+    $('#lastWeekBtn').on('click', function () {
+        // Get last week (Mon–Sun style, or just -7 days)
+        let end = moment().subtract(1, 'days');  // yesterday
+        let start = moment().subtract(7, 'days'); // 7 days ago
+
+        // Format for your backend (same format you’re already using)
+        let formattedRange = start.format('YYYY-MM-DD') + '_' + end.format('YYYY-MM-DD');
+
+        // Set values
+        $('#date_range').val(formattedRange);
+        $('#reportrange span').text(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+
+        // Submit form
+        $('#search_form').submit();
+    });
+
 
 </script>
 @endsection

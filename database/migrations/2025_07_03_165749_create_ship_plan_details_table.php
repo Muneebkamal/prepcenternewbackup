@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('boxes')->nullable();
             $table->integer('units')->nullable();
             $table->date('expiration')->nullable();
-            $table->integer('template')->nullable();
+            $table->integer('tempalte_id')->nullable();
             $table->softDeletes(); // For soft delete functionality
             $table->timestamps();
         });

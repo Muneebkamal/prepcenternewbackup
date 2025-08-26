@@ -15,10 +15,14 @@ class ShipPlanDetail extends Model
         'boxes',
         'units',
         'expiration',
-        'tempalte', // Note: is this a typo? Should it be 'template'?
+        'template_id', // Note: is this a typo? Should it be 'template'?
     ];
     public function product()
     {
         return $this->belongsTo(Products::class);
+    }
+    public function packingTemplate()
+    {
+        return $this->belongsTo(PackingTemplate::class, 'template_id', 'id');
     }
 }

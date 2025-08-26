@@ -317,8 +317,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script>
-        $(document).ready(function () {
         const ship_plan_id_g = $(`#ship_plan_id`).val();
+        const assetBaseUrl = "{{ asset('') }}/";
+        $(document).ready(function () {  
         $('#skuSearchInput').select2({
             placeholder: 'Search SKU, ASIN, or Name...',
             allowClear: true,
@@ -380,6 +381,7 @@
                 alert("Product already added.");
                 return;
             }
+            let rowNumber = $('#productTable tbody tr').length + 1;
             let product_id = null;
             let template_name = '';
             let template_type = '';
@@ -395,10 +397,23 @@
             $('#productTable tbody').append(`
                 <tr id="product-row-${item.id}">
                     <td>
-                        <strong>${item.item}</strong><br>
-                        SKU: ${item.msku}<br>
-                        ASIN: ${item.asin}<br>
-                        FNSKU: ${item.fnsku}<br>
+                        <span class="row-no">${rowNumber}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="${item.image 
+                                ? `${assetBaseUrl}${item.image}` 
+                                : 'https://www.shutterstock.com/shutterstock/photos/2311073121/display_1500/stock-vector-no-photo-thumbnail-graphic-element-no-found-or-available-image-in-the-gallery-or-album-flat-2311073121.jpg'}" 
+                                alt="${item.item}" 
+                                class="img-thumbnail" 
+                                style="width: 50px; height: 50px; object-fit: contain;margin-bottom:auto;">
+                            <div>
+                                <strong>${item.item}</strong><br>
+                                SKU: ${item.msku}<br>
+                                ASIN: ${item.asin}<br>
+                                FNSKU: ${item.fnsku}<br>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <div class="mb-3">
@@ -425,17 +440,18 @@
                     <td>
                         <span id="box_weight${item.id}"></span>
                     </td>
-                   
+                    
                     <td>
                         <span id="totalWeight${item.id}"></span>
+                        
                     </td>
                     
-                   
+                    
                     <td>
                         <div class="row mb-2">
                             <div class="col-6">
                                 <label class="form-label">Boxes</label>
-                                <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.id}]">
+                                <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.id}]" data-id="${item.id}" onchange="saveProductData(${item.id})">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Units</label>
@@ -458,6 +474,9 @@
             loadPackingTemplates(item.id)
             // Optional: clear selection after append
             $('#skuSearchInput').val(null).trigger('change');
+            setTimeout(() => {
+                saveProductData(item.id); // Save immediately after adding
+            }, 1000);
         });
     });
     function searchSku() {
@@ -566,6 +585,9 @@
            
         }else{
             loadPackingTemplates(productId,selectedVal);
+            setTimeout(() => {
+                saveProductData(productId); // Save immediately after changing template
+            }, 1000);
         }
     }
     $('#packingTemplateModal').on('shown.bs.modal', function () {
@@ -722,7 +744,7 @@
             method: 'POST',
             data: data,
             success: function(response) {
-                toastr.success("Saved successfully!");
+                // toastr.success("Saved successfully!");
             },
             error: function(err) {
                 toastr.error("Failed to save.");
@@ -799,6 +821,9 @@
 
     document.getElementById('editUnitsPerBox').addEventListener('input', updateTemplateNameEdit);
     document.getElementById('editTemplateType').addEventListener('change', updateTemplateNameEdit);
-
+    // 🔹 Bind auto-save events
+    $(document).on('input', `.boxesInput[data-id="${item.id}"]`, function () {
+        saveProductData($(this).data("id"));
+    });
 </script>
 @endsection
