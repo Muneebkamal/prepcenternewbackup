@@ -158,6 +158,10 @@ Route::middleware(['auth'])->group(function () {
     ->name('get.shipping-plan');
     Route::post('/shipping-plans/move-item', [ShippingPlanController::class, 'moveITem'])
     ->name('moveITem.shipping-plan');
+    Route::post('/shipping-plan/{id}/update-cost', [ShippingPlanController::class, 'updateCost'])
+    ->name('shippingplan.updateCost');
+    Route::post('/shipping-plan/{id}/update-field', [ShippingPlanController::class, 'updateField']);
+
 
 
 });

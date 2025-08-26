@@ -24,6 +24,11 @@ return new class extends Migration
             $table->integer('updated_by')->nullable();
             $table->double('handling_cost')->default(0);
             $table->double('shipment_fee')->default(0);
+            $table->string('shipment_name')->nullable();
+            $table->string('amazon_id')->nullable();
+            $table->string('amazon_reference_id')->nullable();
+            $table->string('ship_to')->nullable();
+            $table->string('method_carrier')->nullable();
             $table->softDeletes(); // For soft delete functionality
             $table->timestamps();
         });

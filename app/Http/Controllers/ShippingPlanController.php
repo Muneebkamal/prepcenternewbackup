@@ -128,4 +128,26 @@ class ShippingPlanController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Item moved successfully']);
     }
+    public function updateCost(Request $request, $id)
+    {
+        $plan = ShipPlan::findOrFail($id);
+
+        if ($request->field == 'shipment_fee') {
+            $plan->shipment_fee = $request->value;
+        } elseif ($request->field == 'handling_cost') {
+            $plan->handling_cost = $request->value;
+        }
+
+        $plan->save();
+
+        return response()->json(['success' => true, 'message' => 'Updated successfully']);
+    }
+    public function updateField(Request $request, $id)
+    {
+        $plan = ShipPlan::findOrFail($id);
+        $plan->{$request->field} = $request->value;
+        $plan->save();
+        return response()->json(['success' => true]);
+    }
+
 }

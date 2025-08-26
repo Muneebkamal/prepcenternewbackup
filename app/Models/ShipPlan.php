@@ -19,6 +19,11 @@ class ShipPlan extends Model
         'updated_by',
         'handling_cost',
         'shipment_fee',
+        'shipment_name',
+        'amazon_id',
+        'amazon_reference_id',
+        'ship_to',
+        'method_carrier',
     ];
     public function creator()
     {

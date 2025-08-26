@@ -23,9 +23,14 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0 text-end">Step 1: Choose inventory to send</h5>
-            <button type="button" class="btn btn-danger" id="deleteShippingPlan" onclick="deleteShippingPlan({{ $shippingPlan->id }})">
-                Delete
-            </button>
+            @if(
+                (empty($shippingPlan->shipment_fee) || $shippingPlan->shipment_fee == 0) &&
+                (empty($shippingPlan->handling_cost) || $shippingPlan->handling_cost == 0)
+            )
+                <button type="button" class="btn btn-danger" id="deleteShippingPlan" onclick="deleteShippingPlan({{ $shippingPlan->id }})">
+                    Delete
+                </button>
+            @endif
         </div>
         <ul class="nav nav-tabs my-3">
           <li class="nav-item">
@@ -54,11 +59,9 @@
                 <a href="#" class="small">Ship from another address</a>
                 <div class="row">
                     <div class="col-md-6">
-                            <label class="form-label">Marketplace destination</label>
-                            <select class="form-select" name="market_place" id="market_place">
-                            <option value="us" selected>United States</option>
-                            <option value="ca" >Canada</option>
-                            </select>
+                        <label class="form-label">Marketplace destination</label>
+                        <input type="text" class="form-control" value="United States" disabled>
+                        <input type="hidden" name="market_place" value="us">
                     </div>
                     <div class="col-md-6">
                     <label class="form-label">Fulfillment capability</label>
@@ -67,6 +70,38 @@
                         </select>
                     </div>
                 </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Shipment Name</label>
+                        <input type="text" class="form-control auto-save" name="shipment_name" 
+                            value="{{ $shippingPlan->shipment_name ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Amazon ID</label>
+                        <input type="text" class="form-control auto-save" name="amazon_id" 
+                            value="{{ $shippingPlan->amazon_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Amazon Reference ID</label>
+                        <input type="text" class="form-control auto-save" name="amazon_reference_id" 
+                            value="{{ $shippingPlan->amazon_reference_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ship To</label>
+                        <input type="text" class="form-control auto-save" name="ship_to" 
+                            value="{{ $shippingPlan->ship_to ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Method & Carrier</label>
+                        <input type="text" class="form-control auto-save" name="method_carrier" 
+                            value="{{ $shippingPlan->method_carrier ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                    </div>
+                </div>
+
             </div>
             <div class="col-md-6">
                 <table class="table table-bordered align-middle">
@@ -1354,6 +1389,80 @@ function exportShippingPlanExcel() {
         }
     });
 }
+
+    // Function to format decimal value (2 decimals always)
+    function formatDecimal(value) {
+        let num = parseFloat(value);
+        if (isNaN(num)) {
+            return "0.00";
+        }
+        return num.toFixed(2); // always 2 decimal places
+    }
+    // Save cost function
+    function saveCost(field, value) {
+        $.ajax({
+            url: "{{ route('shippingplan.updateCost', $shippingPlan->id) }}", // your update route
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                field: field,
+                value: value
+            },
+            success: function (response) {
+                console.log("Saved:", response);
+            },
+            error: function (xhr) {
+                console.error("Error saving cost:", xhr.responseText);
+            }
+        });
+    }
+
+    // On change Shipping Cost
+    $("#shippingCost").on("change", function () {
+        let formatted = formatDecimal($(this).val());
+        $(this).val(formatted); // update input
+        saveCost("shipment_fee", formatted);
+        toggleDeleteButton();
+    });
+
+    // On change Handling Fee
+    $("#handlingFee").on("change", function () {
+        let formatted = formatDecimal($(this).val());
+        $(this).val(formatted); // update input
+        saveCost("handling_cost", formatted);
+        toggleDeleteButton();
+    });
+    function toggleDeleteButton() {
+        let shippingCost = parseFloat($("#shippingCost").val()) || 0;
+        let handlingFee = parseFloat($("#handlingFee").val()) || 0;
+
+        if (shippingCost === 0 && handlingFee === 0) {
+            $("#deleteShippingPlan").show();
+        } else {
+            $("#deleteShippingPlan").hide();
+        }
+    }
+    $(document).on('change', '.auto-save', function() {
+        let id = $(this).data('id');
+        let field = $(this).attr('name');
+        let value = $(this).val();
+
+        $.ajax({
+            url: '/shipping-plan/' + id + '/update-field',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                field: field,
+                value: value
+            },
+            success: function(res) {
+                console.log('Updated:', field);
+            },
+            error: function(err) {
+                console.error('Error:', err);
+            }
+        });
+    });
 
 
 </script>
