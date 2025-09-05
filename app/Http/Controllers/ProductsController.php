@@ -892,44 +892,44 @@ class ProductsController extends Controller
     //     return false;
     // }
     private function fetchImage($url, $regex, $attempt = 0, $maxRetries = 3)
-{
-    try {
-        $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',
-            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language' => 'en-US,en;q=0.5',
-            'Referer' => 'https://www.google.com/',
-        ])->timeout(10)->get($url);
+    {
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language' => 'en-US,en;q=0.5',
+                'Referer' => 'https://www.google.com/',
+            ])->timeout(10)->get($url);
 
-        if ($response->successful()) {
-            $body = $response->body();
-            \Log::info("Response Body: " . substr($body, 0, 500)); // Log first 500 chars for debugging
+            if ($response->successful()) {
+                $body = $response->body();
+                \Log::info("Response Body: " . substr($body, 0, 500)); // Log first 500 chars for debugging
 
-            // Check for CAPTCHA
-            if (str_contains($body, 'Robot Check') || str_contains($body, 'Enter the characters you see below')) {
-                \Log::warning("Amazon CAPTCHA detected. Aborting.");
-                return null;
+                // Check for CAPTCHA
+                if (str_contains($body, 'Robot Check') || str_contains($body, 'Enter the characters you see below')) {
+                    \Log::warning("Amazon CAPTCHA detected. Aborting.");
+                    return null;
+                }
+
+                // Check if image URL matches
+                if (preg_match($regex, $body, $matches)) {
+                    \Log::info("Matched Image URL: " . $matches[0]);
+                    return $matches[0];
+                }
             }
-
-            // Check if image URL matches
-            if (preg_match($regex, $body, $matches)) {
-                \Log::info("Matched Image URL: " . $matches[0]);
-                return $matches[0];
-            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to fetch image from {$url} on attempt {$attempt}: " . $e->getMessage());
         }
-    } catch (\Exception $e) {
-        \Log::error("Failed to fetch image from {$url} on attempt {$attempt}: " . $e->getMessage());
-    }
 
-    // Retry logic
-    if ($attempt < $maxRetries) {
-        sleep(1); // Pause before retrying
-        return $this->fetchImage($url, $regex, $attempt + 1, $maxRetries);
-    }
+        // Retry logic
+        if ($attempt < $maxRetries) {
+            sleep(1); // Pause before retrying
+            return $this->fetchImage($url, $regex, $attempt + 1, $maxRetries);
+        }
 
-    \Log::error("Failed to fetch image after {$maxRetries} attempts.");
-    return null;
-}
+        \Log::error("Failed to fetch image after {$maxRetries} attempts.");
+        return null;
+    }
 
 
     public function getImageProductImages(Request $request)
@@ -1173,5 +1173,36 @@ class ProductsController extends Controller
                 ->update(['deleted_at' => Carbon::now()]);
             }
         }
+    }
+    public function updateImage(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        $product = Products::findOrFail($request->product_id);
+
+        // ✅ Define directory: public/Products/{id}
+        $directory = public_path("Products/{$product->id}");
+
+        // ✅ Create directory if not exists
+        if (!file_exists($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        // ✅ Generate unique filename
+        $filename = time() . '.' . $request->file('image')->getClientOriginalExtension();
+
+        // ✅ Move uploaded file
+        $request->file('image')->move($directory, $filename);
+
+        // ✅ Save relative path in DB
+        $product->image = "Products/{$product->id}/{$filename}";
+        $product->save();
+
+        return response()->json([
+            'new_image_url' => asset("Products/{$product->id}/{$filename}")
+        ]);
     }
 }

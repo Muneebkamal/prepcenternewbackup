@@ -3,16 +3,42 @@
 @section('title', 'Shipping Plan | Prepcenter')
 
 @section('styles')
+<style>
+    .product-img-wrapper:hover .edit-image-btn {
+    display: inline-block;
+}
 
+</style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
     <div class="row d-flex align-items-center">
-        <div class="col-md-6">
-            <h1 class="mb-3">Shipping Plan - {{ $shippingPlan->custom_id }}</h1>
+        <div class="col-md-8 ">
+            <h1 class="mb-3 d-flex ">
+                Shipping Plan - {{ $shippingPlan->custom_id }}
+                <span id="shipping-name-wrapper" class="d-flex ms-5 align-items-center gap-2 float-left">
+                <!-- Display text -->
+                @php
+                    $displayName = $shippingPlan->name ?? ''; // Adjust as per your model
+                @endphp
+                <span id="shipping-name-text"> {{ $displayName ? '- ' . $displayName : '- Name' }}</span>
+
+                <!-- Hidden input -->
+                <input type="text" id="shipping-name-input" 
+                    class="form-control d-none" 
+                    value="{{ $shippingPlan->name }}" 
+                    style="max-width: 250px;">
+                <!-- Buttons -->
+                <button id="edit-btn-name" class="btn btn-sm btn-primary">Edit</button>
+                <button id="save-btn-name" class="btn btn-sm btn-success d-none">Save</button>
+                <button id="cancel-btn-name" class="btn btn-sm btn-secondary d-none">Cancel</button>
+            </span>
+            </h1>
+
+            
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-4 text-end">
             <h6>Created By: {{ $shippingPlan->creator?->name ?? 'N/A' }}</h6>
             <h6>Created At: {{ $shippingPlan->created_at->format('Y-m-d h:i A') }}</h6>
         </div>
@@ -23,7 +49,8 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0 text-end">Step 1: Choose inventory to send</h5>
-            @if(
+            <span>
+                @if(
                 (empty($shippingPlan->shipment_fee) || $shippingPlan->shipment_fee == 0) &&
                 (empty($shippingPlan->handling_cost) || $shippingPlan->handling_cost == 0)
             )
@@ -31,6 +58,10 @@
                     Delete
                 </button>
             @endif
+            <button type="button" class="btn btn-success" id="saveShippingPlan" onclick="saveShippingPlanData({{ $shippingPlan->id }})">
+                Save
+            </button>
+            </span>
         </div>
         <ul class="nav nav-tabs my-3">
           <li class="nav-item">
@@ -41,7 +72,7 @@
           </li> --}}
         </ul>
 
-        <div class="row g-3">
+        {{-- <div class="row g-3">
             <div class="col-md-2 d-none">
                 <label class="form-label d-block mb-2">SKU Selection Method</label>
                 <div class="form-check">
@@ -146,7 +177,7 @@
                         <tr>
                             <td><strong>Total Charges</strong></td>
                             <td><strong id="totalCost">0.00</strong> 
-                                {{-- <div class="small text-muted">Per Item: <span id="totalPerItem">0.00</span></div> --}}
+                                
                             </td>
                         </tr>
                         <tr>
@@ -172,11 +203,132 @@
                     </label>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <div class="row mt-3 g-3">
-        
-   
+        <div class="row g-3">
+            {{-- Row 1: Shipment Info --}}
+            <div class="col-md-4">
+                <div class="card p-3 h-100">
+                    <h5 class="mb-3">Shipment Info</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Shipment Name</label>
+                            <input type="text" id="shipment_name" class="form-control auto-save" name="shipment_name" 
+                                value="{{ $shippingPlan->shipment_name ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Amazon ID</label>
+                            <input type="text" id="amazon_id" class="form-control auto-save" name="amazon_id" 
+                                value="{{ $shippingPlan->amazon_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                        </div>
+
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label">Amazon Reference ID</label>
+                            <input type="text" id="amazon_reference_id" class="form-control auto-save" name="amazon_reference_id" 
+                                value="{{ $shippingPlan->amazon_reference_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label">Fulfillment capability</label>
+                            <select class="form-select" id="fullment_capability" name="fullment_capability" id="fullment_capability">
+                                <option value="full_fillment" value="{{ $shippingPlan->full_fillment??'' }}">
+                                    Standard Fulfillment by Amazon
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label">Marketplace destination</label>
+                            <input type="text" class="form-control" value="United States" disabled>
+                            <input type="hidden" name="market_place" value="us">
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            {{-- Row 2: Ship From / Ship To --}}
+            <div class="col-md-3">
+                <div class="card p-3 h-100">
+                    <h5 class="mb-3">Shipping Address</h5>
+                    <p>
+                        <strong>Ship From:</strong> Favorite Commodities Inc, 3320 LAWSON BLVD, OCEANSIDE, NY, 11572, US 
+                        <a href="#" class="small">Change</a>
+                    </p>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label">Ship To</label>
+                            <input type="text" id="ship_to" class="form-control auto-save" name="ship_to" 
+                                value="{{ $shippingPlan->ship_to ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Method & Carrier</label>
+                            <input type="text" id="method_carrier" class="form-control auto-save" name="method_carrier" 
+                                value="{{ $shippingPlan->method_carrier ?? '' }}" data-id="{{ $shippingPlan->id }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{-- Row 4: Totals Table --}}
+            <div class="col-md-5">
+                <div class="card p-3 h-100">
+                    <h5 class="mb-3">Shipment Totals</h5>
+                    <table class="table table-bordered align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <td><strong>Total Units</strong></td>
+                                <td id="footerUnits">0</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Boxes</strong></td>
+                                <td id="footerBoxes">0</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Weight (lb)</strong></td>
+                                <td id="footerTotalWeight">0</td>
+                            </tr>
+                            
+                            <tr>
+                                <td><strong>Handling Fee</strong></td>
+                                <td>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" name="handling_fee" id="handlingFee" 
+                                            class="form-control" step="0.01" 
+                                            value="{{ number_format($shippingPlan->handling_cost, 2, '.', '') }}">
+                                    </div>
+                                    <div class="small text-muted">Per Item: <span id="perItemHandling">0.00</span></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Shipment Cost</strong></td>
+                                <td>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" id="shippingCost" name="shipment_cost" 
+                                            class="form-control" step="0.01" 
+                                            value="{{ number_format($shippingPlan->shipment_fee, 2, '.', '') }}">
+                                    </div>
+                                    <div class="small text-muted">Per Item: <span id="perItemShipping">0.00</span></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Charges</strong></td>
+                                <td><strong id="totalCost">0.00</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cost per Unit</strong></td>
+                                <td><strong id="totalPerItem">0.00</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cost per Lb</strong></td>
+                                <td><strong id="costPerLb"><span id="totalPerItem">0.00</span></strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
       </div>
     </div>
@@ -239,10 +391,10 @@
             <h6 class="d-none">Total prep and labeling fees: <strong>$0.00</strong></h6>
             <button class="btn btn-primary d-none" onclick="saveShipingPlan()">Confirm and continue</button>
             <button type="button" class="btn btn-primary btn-sm" onclick="printProductTable()">
-                Print Table
+                Export Excel
             </button>
             <button type="button" class="btn btn-primary btn-sm" onclick="exportShippingPlanExcel()">
-                Export Excel
+                Manifest Format 
             </button>
         </div>
         </div>
@@ -438,6 +590,25 @@
     </div>
   </div>
 </div>
+<!-- 🔹 Image Upload Modal -->
+<div class="modal fade" id="editImageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Product Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="imagePreview" src="" class="img-fluid mb-3" style="max-height:200px; object-fit:contain;">
+        <input type="file" id="imageInput" accept="image/*" class="form-control">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveImageBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 @endsection
 @section('script')
@@ -589,8 +760,8 @@
                     <td>
                         <div class="row mb-2">
                             <div class="col-6">
-                                <label class="form-label">Boxes</label>
-                                <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.id}]" data-id="${item.id}" onchange="saveProductData(${item.id})">
+                                <label class="form-label boxlable${item.id}">Boxes</label>
+                                <input type="number" class="form-control form-control-sm boxlable${item.id}" min="0" name="boxes[${item.id}]" data-id="${item.id}" onchange="saveProductData(${item.id})">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Units</label>
@@ -651,7 +822,7 @@
                     );
                 });
                 // Always add individual_units
-                $select.append(`<option value="individual_units">Individual units</option>`);
+                $select.append(`<option value="individual_units" ${selectedVal==0?'selected':''}>Individual units</option>`);
                 // Show 'Create new packing template' if less than 3
                 if (templates.length < 3) {
                     $select.append(`<option value="new_template">Create new packing template</option>`);
@@ -659,8 +830,8 @@
                 // If at least one template exists, apply its data immediately
                 if(selectedVal == 0){
                     if (templates.length > 0) {
-                        const firstTemplate = templates[0];
-                        applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
+                        // const firstTemplate = templates[0];
+                        // applyTemplateDataToRow(firstTemplate, productId); // 👈 Call here
                     }
                 }else{
                     if (templates.length > 0) {
@@ -722,9 +893,22 @@
             })
             .modal('show');
         }else if (selectedVal === 'individual_units') {
-           
+            $(`input[name="units[${productId}]"]`).prop("readonly", false);
+            $(`#perPiece${productId}`).text('');
+            $(`#dimensions${productId}`).text('');
+            $(`#original_pack${productId}`).text('--');
+            $(`#box_weight${productId}`).text('');
+
+            $(`#totalWeight${productId}`).text('0.0');
+            $('.boxlable'+productId).addClass('d-none');
+            $(`input[name="units[${productId}]"]`).val(0);
+            setTimeout(() => {
+               saveProductData(productId)
+            }, 1000); // Delay to ensure select2 has updated
         }else{
             loadPackingTemplates(productId,selectedVal);
+            $(`input[name="units[${productId}]"]`).prop("readonly", true);
+            $('.boxlable'+productId).removeClass('d-none');
             setTimeout(() => {
                saveProductData(productId)
             }, 1000); // Delay to ensure select2 has updated
@@ -860,10 +1044,10 @@
     });
     function saveProductData( productId) {
         const boxes = $(`input[name="boxes[${productId}]"]`).val();
-        console.log(boxes);
         const units = $(`input[name="units[${productId}]"]`).val();
         const expiration = $(`input[name="expiration[${productId}]"]`).val();
         const templateType = $(`#templateType${productId}`).val();
+        templateType == 'individual_units'?0:templateType;
         const costTotal = 0.00;
         const ship_plan_id = $(`#ship_plan_id`).val();
 
@@ -936,9 +1120,15 @@
        
     }
     function getOldITems(custom_id){
-        var totalWEightGb = 0;
+            totalWEightGb = 0;
         var totalBoxes = 0;
         var totalUnits = 0;
+        let shippingCost = parseFloat($("#shippingCost").val()) || 0;
+        let handlingFee = parseFloat($("#handlingFee").val()) || 0;
+        var isHidden = 'd-none';
+        if (shippingCost === 0 && handlingFee === 0) {
+            isHidden = '';
+        }
         $('#productTable tbody').empty();
         $.ajax({
             url: `{{ url('/get-shipping-plan-items/${custom_id} ') }}`, // Your backend route
@@ -954,6 +1144,7 @@
                     totalUnits += item.units || 0;
                     // Prevent duplicate rows
                     if ($('#product-row-' + item.product.id).length) return;
+                    var productUrl = `{{ url('products') }}/${item.product.id}/edit`;
                     $('#productTable tbody').append(`
                         <tr id="product-row-${item.product.id}">
                             <td>
@@ -961,14 +1152,25 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="${item.product.image 
-                                        ? `${assetBaseUrl}${item.product.image}` 
-                                        : 'https://www.shutterstock.com/shutterstock/photos/2311073121/display_1500/stock-vector-no-photo-thumbnail-graphic-element-no-found-or-available-image-in-the-gallery-or-album-flat-2311073121.jpg'}" 
-                                        alt="${item.product?.item || item.item}" 
-                                        class="img-thumbnail" 
-                                        style="width: 50px; height: 50px; object-fit: contain;margin-bottom:auto;">
+                                    <div class="position-relative product-img-wrapper" style="width: 80px; height: 80px;">
+                                            <img src="${item.product.image 
+                                                ? `${assetBaseUrl}${item.product.image}` 
+                                                : 'https://www.shutterstock.com/shutterstock/photos/2311073121/display_1500/stock-vector-no-photo-thumbnail-graphic-element-no-found-or-available-image-in-the-gallery-or-album-flat-2311073121.jpg'}" 
+                                                alt="Product Image" 
+                                                class="img-thumbnail product-img" 
+                                                style="width: 80px; height: 80px; object-fit: contain; margin-bottom:auto;"
+                                                data-product-id="${item.product?.id}">
+                                            
+                                            <button type="button" 
+                                                class="btn btn-xs btn-primary edit-image-btn"
+                                                data-product-id="${item.product?.id}"
+                                                style="position: absolute; top: 2px; right: 2px; padding: 2px 6px; font-size: 10px; line-height: 1;">
+                                                Edit
+                                            </button>
+                                        </div>
+
                                     <div>
-                                        <strong>${item.product?.item || item.item}</strong><br>
+                                        <a target="_blank" href="${productUrl}"><strong>${item.product?.item || item.item}</strong><br></a>
                                         SKU: ${item.product?.msku || item.msku}<br>
                                         ASIN: ${item.product?.asin || item.asin}<br>
                                         FNSKU: ${item.product?.fnsku || item.fnsku}<br>
@@ -1000,8 +1202,8 @@
                             <td>
                                 <div class="row mb-2">
                                     <div class="col-6">
-                                        <label class="form-label">Boxes</label>
-                                        <input type="number" class="form-control form-control-sm" min="0" name="boxes[${item.product.id}]" value="${item.boxes || ''}" data-id="${item.product.id}" onchange="saveProductData(${item.product.id})">
+                                        <label class="form-label boxlable${item.product.id}">Boxes</label>
+                                        <input type="number" class="form-control form-control-sm boxlable${item.product.id}" min="0" name="boxes[${item.product.id}]" value="${item.boxes || ''}" data-id="${item.product.id}" onchange="saveProductData(${item.product.id})">
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label">Units</label>
@@ -1031,7 +1233,20 @@
                         </tr>
                     `);
                     // Load templates for that product
-                    loadPackingTemplates(item.product.id,item.tempalte_id);
+                    loadPackingTemplates(item.product.id,item.template_id);
+                    console.log(item.template_id);
+                    if(item.template_id == 0){
+                        $(`input[name="units[${item.product.id}]"]`).prop("readonly", false);
+                        $(`#perPiece${item.product.id}`).text('');
+                        $(`#dimensions${item.product.id}`).text('');
+                        $(`#original_pack${item.product.id}`).text('--');
+                        $(`#box_weight${item.product.id}`).text('');
+                        $(`#totalWeight${item.product.id}`).text('0.0');
+                        $('.boxlable'+item.product.id).addClass('d-none');
+                    }else{
+                        $(`input[name="units[${item.product.id}]"]`).prop("readonly", true);
+                        $('.boxlable'+item.product.id).removeClass('d-none');
+                    }
                 });
             }
         });
@@ -1213,16 +1428,18 @@
 
         var perItemHandling = (totalUnits > 0) ? (handlingFee / totalUnits) : 0;
         var perItemShipping = (totalUnits > 0) ? (shippingCost / totalUnits) : 0;
-        var costPerLb = (totalUnits > 0) ? (footerTotalWeight / totalUnits) : 0;
+        
 
         $("#perItemHandling").text("$" + perItemHandling.toFixed(2));
         $("#perItemShipping").text("$" + perItemShipping.toFixed(2));
 
         var totalCost = handlingFee + shippingCost;
         $("#totalCost").html("<strong>$" + totalCost.toFixed(2) + "</strong>");
+        var costPerLb = (totalUnits > 0) ? (totalCost/  footerTotalWeight) : 0;
 
         $("#totalPerItem").html("<strong>$" + (perItemHandling + perItemShipping).toFixed(2) + "</strong>");
-        $("#costPerLb").html("<strong>$" + (costPerLb).toFixed(2) + "</strong>");
+        let safeCost = (!isFinite(costPerLb) || isNaN(costPerLb)) ? 0 : costPerLb;
+        $("#costPerLb").html("<strong>$" + safeCost.toFixed(2) + "</strong>");
     }
 
 
@@ -1232,97 +1449,105 @@
         $(this).val(val.toFixed(2));
     });
     function printProductTable(downloadExcel = true) {
-    $.ajax({
-        url: `/get-shipping-plan-items/${ship_plan_id_g}`,
-        method: 'GET',
-        success: function(response) {
-            let totalWeight = 0;
-            let totalUnits = 0;
+        $.ajax({
+            url: `/get-shipping-plan-items/${ship_plan_id_g}`,
+            method: 'GET',
+            success: function(response) {
+                let totalWeight = 0;
+                let totalUnits = 0;
 
-            let table = `
-                <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 14px; text-align: center;">
-                    <thead style="background-color: #f2f2f2;">
+                let table = `
+                    <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 14px; text-align: center;">
+                        <thead style="background-color: #f2f2f2;">
+                            <tr>
+                                <th>MSKU</th>
+                                <th>Title</th>
+                                <th>FNSKU</th>
+                                <th>ASIN</th>
+                                <th>Qty</th>
+                                <th>Qty/Case</th>
+                                <th>Carton</th>
+                                <th>Weight</th>
+                                <th>Total Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                response.forEach(function(item) {
+                    const msku   = item.product.msku ?? '';
+                    const asin   = item.product.asin ?? '';
+                    const title  = item.product.item ?? '';
+                    const fnsku  = item.product.fnsku ?? '';
+                    const qty    = item.units ?? 0;
+                    const boxes  = item.boxes ?? 0;
+                    const weight = item.packing_template ? (item.packing_template.box_weight ?? 0) : 0;
+                    const caseQty = item.packing_template ? (item.packing_template.units_per_box ?? 0) : 0;
+                    const total  = (boxes * weight).toFixed(2);
+
+                    totalUnits  += parseInt(qty);
+                    totalWeight += parseFloat(total);
+
+                    table += `
                         <tr>
-                            <th>MSKU</th>
-                            <th>Title</th>
-                            <th>FNSKU</th>
-                            <th>ASIN</th>
-                            <th>Qty</th>
-                            <th>Qty/Case</th>
-                            <th>Carton</th>
-                            <th>Weight</th>
-                            <th>Total Weight</th>
+                            <td >${msku}</td>
+                            <td text-align:left;">${title}</td>
+                            <td >${fnsku}</td>
+                            <td >${asin}</td>
+                            <td >${qty}</td>
+                            <td >${caseQty}</td>
+                            <td >${boxes}</td>
+                            <td >${weight}</td>
+                            <td >${total}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            response.forEach(function(item) {
-                const msku   = item.product.msku ?? '';
-                const asin   = item.product.asin ?? '';
-                const title  = item.product.item ?? '';
-                const fnsku  = item.product.fnsku ?? '';
-                const qty    = item.units ?? 0;
-                const boxes  = item.boxes ?? 0;
-                const weight = item.packing_template ? (item.packing_template.box_weight ?? 0) : 0;
-                const caseQty = item.packing_template ? (item.packing_template.units_per_box ?? 0) : 0;
-                const total  = (boxes * weight).toFixed(2);
-
-                totalUnits  += parseInt(qty);
-                totalWeight += parseFloat(total);
+                    `;
+                });
 
                 table += `
-                    <tr>
-                        <td >${msku}</td>
-                        <td text-align:left;">${title}</td>
-                        <td >${fnsku}</td>
-                        <td >${asin}</td>
-                        <td >${qty}</td>
-                        <td >${caseQty}</td>
-                        <td >${boxes}</td>
-                        <td >${weight}</td>
-                        <td >${total}</td>
-                    </tr>
+                        </tbody>
+                        <tfoot style="font-weight: bold; background-color: #ddd;">
+                            <tr>
+                                <td colspan="4" style="padding: 6px;">Totals</td>
+                                <td style="padding: 6px;">${totalUnits}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="padding: 6px;">${totalWeight.toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 `;
-            });
+                const now = new Date();
+                const timestamp = now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, '0') + "-" +
+                String(now.getDate()).padStart(2, '0') + "-" +
+                String(now.getHours()).padStart(2, '0') +
+                String(now.getMinutes()).padStart(2, '0') +
+                String(now.getSeconds()).padStart(2, '0');
 
-            table += `
-                    </tbody>
-                    <tfoot style="font-weight: bold; background-color: #ddd;">
-                        <tr>
-                            <td colspan="4" style="padding: 6px;">Totals</td>
-                            <td style="padding: 6px;">${totalUnits}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td style="padding: 6px;">${totalWeight.toFixed(2)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            `;
-
-            if (downloadExcel) {
-                // Convert to Excel and download
-                let blob = new Blob([table], { type: "application/vnd.ms-excel" });
-                let url = window.URL.createObjectURL(blob);
-                let a = document.createElement("a");
-                a.href = url;
-                a.download = "shipping_plan_items.xls";
-                a.click();
-                window.URL.revokeObjectURL(url);
-            } else {
-                // Print
-                let printWindow = window.open('', '', 'width=900,height=700');
-                printWindow.document.write(table);
-                printWindow.document.close();
-                printWindow.print();
+                const filename = `ShippingPlan-${ship_plan_id_g}.xls`;
+                if (downloadExcel) {
+                    // Convert to Excel and download
+                    let blob = new Blob([table], { type: "application/vnd.ms-excel" });
+                    let url = window.URL.createObjectURL(blob);
+                    let a = document.createElement("a");
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    // Print
+                    let printWindow = window.open('', '', 'width=900,height=700');
+                    printWindow.document.write(table);
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+            },
+            error: function(xhr) {
+                console.error('Error fetching items:', xhr.responseText);
             }
-        },
-        error: function(xhr) {
-            console.error('Error fetching items:', xhr.responseText);
-        }
-    });
-}
+        });
+    }
 
 
 </script>
@@ -1382,7 +1607,16 @@ function exportShippingPlanExcel() {
             XLSX.utils.book_append_sheet(wb, ws, "Workflow Template");
 
             // 🔹 Export File
-            XLSX.writeFile(wb, "Workflow_Template.xlsx");
+            // 🔹 Create unique filename with current date-time
+            const now = new Date();
+            const timestamp = now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, '0') + "-" +
+            String(now.getDate()).padStart(2, '0') + "-" +
+            String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0') +
+            String(now.getSeconds()).padStart(2, '0');
+            const filename = `Manifest-Format-${timestamp}.xlsx`;
+            XLSX.writeFile(wb, filename);
         },
         error: function(xhr) {
             console.error('Error fetching items:', xhr.responseText);
@@ -1442,28 +1676,149 @@ function exportShippingPlanExcel() {
             $("#deleteShippingPlan").hide();
         }
     }
-    $(document).on('change', '.auto-save', function() {
-        let id = $(this).data('id');
-        let field = $(this).attr('name');
-        let value = $(this).val();
+    // $(document).on('change', '.auto-save', function() {
+    //     let id = $(this).data('id');
+    //     let field = $(this).attr('name');
+    //     let value = $(this).val();
+
+    //     $.ajax({
+    //         url: '/shipping-plan/' + id + '/update-field',
+    //         type: 'POST',
+    //         data: {
+    //             _token: '{{ csrf_token() }}',
+    //             field: field,
+    //             value: value
+    //         },
+    //         success: function(res) {
+    //             console.log('Updated:', field);
+    //         },
+    //         error: function(err) {
+    //             console.error('Error:', err);
+    //         }
+    //     });
+    // });
+    let selectedProductId = null;
+    let newImageFile = null;
+
+    // Open modal on Edit button click
+    $(document).on("click", ".edit-image-btn", function() {
+        selectedProductId = $(this).data("product-id");
+        const currentImg = $(this).siblings("img").attr("src");
+        $("#imagePreview").attr("src", currentImg);
+        $("#imageInput").val("");
+        newImageFile = null;
+
+        $("#editImageModal").modal("show");
+    });
+
+    // Live preview when selecting new image
+    $("#imageInput").on("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            newImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $("#imagePreview").attr("src", e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Save new image
+    $("#saveImageBtn").on("click", function() {
+        if (!newImageFile || !selectedProductId) {
+            alert("Please select an image.");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("image", newImageFile);
+        formData.append("product_id", selectedProductId);
 
         $.ajax({
-            url: '/shipping-plan/' + id + '/update-field',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                field: field,
-                value: value
+            url: `{{ route('product.upload.image') }}`, // your backend route
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function(res) {
-                console.log('Updated:', field);
+            success: function(response) {
+                // update product image live
+                $(`img[data-product-id="${selectedProductId}"]`).attr("src", response.new_image_url);
+
+                $("#editImageModal").modal("hide");
             },
-            error: function(err) {
-                console.error('Error:', err);
+            error: function(xhr) {
+                alert("Failed to upload image");
             }
         });
     });
+    function saveShippingPlanData(id) {
+        // Collect values by ID
+        let shipmentName     = $('#shipment_name').val();
+        let amazonId         = $('#amazon_id').val();
+        let amazonReference  = $('#amazon_reference_id').val();
+        let shipTo           = $('#ship_to').val();
+        let method_carrier          = $('#method_carrier').val();
 
+        $.ajax({
+            url: `{{ url('save-shipping-plan-data') }}`,   // 👈 your route here
+            method: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'), // CSRF
+                shipment_name: shipmentName,
+                amazon_id: amazonId,
+                amazon_reference_id: amazonReference,
+                ship_to: shipTo,
+                method_carrier: method_carrier,
+                id: id,
+            },
+            success: function(response) {
+                toastr.success("Shipping plan saved successfully!");
+                console.log(response);
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                alert("Something went wrong!");
+            }
+        });
+    }
+
+    // Edit button
+    $("#edit-btn-name").click(function () {
+        $("#shipping-name-text").addClass("d-none");
+        $("#shipping-name-input").removeClass("d-none");
+        $("#edit-btn-name").addClass("d-none");
+        $("#save-btn-name, #cancel-btn-name").removeClass("d-none");
+    });
+
+    // Cancel button
+    $("#cancel-btn-name").click(function () {
+        $("#shipping-name-input").addClass("d-none");
+        $("#shipping-name-text").removeClass("d-none");
+        $("#edit-btn-name").removeClass("d-none");
+        $("#save-btn-name, #cancel-btn-name").addClass("d-none");
+    });
+
+    // Save button
+    $("#save-btn-name").click(function () {
+        let newName = $("#shipping-name-input").val();
+
+        $.ajax({
+            url: "{{ route('shipping.update.name', $shippingPlan->id) }}", // your update route
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                name: newName
+            },
+            success: function (response) {
+                $("#shipping-name-text").text(response.name);
+                $("#cancel-btn-name").click(); // reset UI
+            }
+        });
+    });
 
 </script>
 

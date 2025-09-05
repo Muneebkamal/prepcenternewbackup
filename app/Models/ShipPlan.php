@@ -11,6 +11,7 @@ class ShipPlan extends Model
     use HasFactory, SoftDeletes;
     protected $fillable = [
         'custom_id',
+        'name',
         'sku_method',
         'fullment_capability',
         'market_place',
@@ -24,6 +25,7 @@ class ShipPlan extends Model
         'amazon_reference_id',
         'ship_to',
         'method_carrier',
+        'is_pending',
     ];
     public function creator()
     {

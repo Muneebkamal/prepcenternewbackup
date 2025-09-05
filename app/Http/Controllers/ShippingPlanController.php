@@ -11,7 +11,7 @@ class ShippingPlanController extends Controller
 {
     public function index()
     {
-        $shippingPlans = ShipPlan::get();
+        $shippingPlans = ShipPlan::where('is_pending',0)->get();
         return view('shipping-plan.index',get_defined_vars());
     }
     public function create()
@@ -23,8 +23,22 @@ class ShippingPlanController extends Controller
 
         // Generate next custom_id with leading zeros
         $nextId = str_pad((int)$latestId + 1, 3, '0', STR_PAD_LEFT);
-        $created_by = auth()->user()->name ?? 'System';
-
+        $created_by = auth()->user()->id ?? 'System';
+        $shipPlan = ShipPlan::updateOrCreate(
+            ['custom_id' =>  $nextId], // 🔄 Match on custom_id
+            [ // 🔁 Update with:
+                'sku_method' => $data['sku_method'] ?? '',
+                'fullment_capability' => 'full_fillment',
+                'market_place' => 'us',
+                'show_filter' => $data['show_filter'] ?? 0,
+                'handling_cost' => $data['handling_cost'] ?? 0,
+                'is_pending' => 1,
+                'shipment_fee' => $data['shipment_fee'] ?? 0,
+                'created_by' => $created_by,
+            ]
+        );
+        $shippingPlan = ShipPlan::with('creator')->findOrFail( $shipPlan->id);
+        return redirect()->route('shipping-plans.edit', $shipPlan->custom_id);
         return view('shipping-plan.create',get_defined_vars());
     }
     public function store(Request $request){
@@ -66,7 +80,7 @@ class ShippingPlanController extends Controller
     }
     public function Edit($id)
     {
-        $shippingPlan = ShipPlan::with('creator')->findOrFail($id);
+        $shippingPlan = ShipPlan::with('creator')->where('is_pending',0)->where('custom_id',$id)->first();
         return view('shipping-plan.edit',get_defined_vars());
     }
     public function destroy($id)
@@ -77,29 +91,40 @@ class ShippingPlanController extends Controller
         return response()->json(['success' => true]);
     }
     public function saveItem(Request $request){
-        $item = ShipPlanDetail::where('ship_plan_id',$request->ship_plan_id)->where('product_id',$request->product_id)->first();
-        if( $item){
-            $item->product_id = $request->product_id;
-            $item->ship_plan_id = $request->ship_plan_id;
-            $item->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
-            $item->units = $request->units;
-            $item->boxes = $request->boxes;
-            $item->expiration = $request->expiration;
-            $item->save();
-        }else{
-            $newItem =  new ShipPlanDetail;
-            $newItem->product_id = $request->product_id;
-            $newItem->ship_plan_id = $request->ship_plan_id;
-            $newItem->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
-            $newItem->units = $request->units;
-            $newItem->boxes = $request->boxes;
-            $newItem->expiration = $request->expiration;
-            $newItem->save();
+        $shipping_plan = ShipPlan::where('custom_id',$request->ship_plan_id)->first();
+        if( $shipping_plan ){
+            $item = ShipPlanDetail::where('ship_plan_id',$shipping_plan->id)->where('product_id',$request->product_id)->first();
+            if( $item){
+                $item->product_id = $request->product_id;
+                $item->ship_plan_id = $shipping_plan->id;
+                $item->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
+                $item->units = $request->units;
+                $item->boxes = $request->boxes;
+                $item->expiration = $request->expiration;
+                $item->save();
+            }else{
+                $newItem =  new ShipPlanDetail;
+                $newItem->product_id = $request->product_id;
+                $newItem->ship_plan_id = $shipping_plan->id;
+                $newItem->template_id = is_numeric($request->template_type) ? $request->template_type : 0;
+                $newItem->units = $request->units;
+                $newItem->boxes = $request->boxes;
+                $newItem->expiration = $request->expiration;
+                $newItem->save();
+            }
+             $shipping_plan->is_pending = 0;
+             $shipping_plan->save();
         }
+        return response()->json(['success' => true]);
 
     }
     public function getShippingItems($custom_id){
-        $items = ShipPlanDetail::where('ship_plan_id',$custom_id) ->with(['product', 'packingTemplate'])->get();
+        $shipping_plan = ShipPlan::where('custom_id',$custom_id)->where('is_pending',0)->first();
+        if( $shipping_plan ){
+            $items = ShipPlanDetail::where('ship_plan_id',$shipping_plan->id) ->with(['product', 'packingTemplate'])->get();
+        }else{
+            $items = [];
+        }
         return response()->json($items);
     }
     public function deleteProduct($id, Request $request)
@@ -118,7 +143,7 @@ class ShippingPlanController extends Controller
         return response()->json(['success' => false], 400);
     }
     public function getAllShipPlans(){
-        $shipPlans = ShipPlan::with('creator')->get();
+        $shipPlans = ShipPlan::with('creator')->Where('is_pending',0)->get();
         return response()->json($shipPlans);
     }
     public function moveITem(Request $request){
@@ -137,7 +162,7 @@ class ShippingPlanController extends Controller
         } elseif ($request->field == 'handling_cost') {
             $plan->handling_cost = $request->value;
         }
-
+        $plan->is_pending = 0;     
         $plan->save();
 
         return response()->json(['success' => true, 'message' => 'Updated successfully']);
@@ -146,8 +171,28 @@ class ShippingPlanController extends Controller
     {
         $plan = ShipPlan::findOrFail($id);
         $plan->{$request->field} = $request->value;
+        $plan->is_pending = 0;
         $plan->save();
         return response()->json(['success' => true]);
+    }
+    public function saveShippingPlanData(Request $request)
+    {
+        $plan = ShipPlan::findOrFail($request->id);
+        $plan->shipment_name = $request->shipment_name;
+        $plan->amazon_id = $request->amazon_id;
+        $plan->amazon_reference_id = $request->amazon_reference_id;
+        $plan->ship_to = $request->ship_to;
+        $plan->method_carrier = $request->method_carrier;
+        $plan->is_pending = 0;
+        $plan->save();
+        return response()->json(['success' => true]);
+    }
+    public function updatePlanName($id,Request $request)
+    {
+        $plan = ShipPlan::findOrFail($id);
+        $plan->name = $request->name;
+        $plan->save();
+        return response()->json(['success' => true, 'name' => $plan->name]);
     }
 
 }

@@ -139,6 +139,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/prep-orders/update-qty', [PrepOrderController::class, 'updateQtyNew'])->name('prep-orders.update-qty');
     Route::post('/save-new-product', [PrepOrderController::class, 'saveNewProduct'])->name('prep-orders.saveNewProduct');
     Route::post('/packing-template/save', [ProductsController::class, 'savePackingTemplate'])->name('packing-template.store');
+    Route::post('/upload-image', [ProductsController::class, 'updateImage'])->name('product.upload.image');
     Route::get('/packing-templates/{product}', [ProductsController::class, 'getTemplates']);
     Route::get('/packing-template/{id}', [ProductsController::class, 'showTemplate']);
     Route::put('/packing-template/{id}', [ProductsController::class, 'updateTemplate']);
@@ -161,6 +162,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/shipping-plan/{id}/update-cost', [ShippingPlanController::class, 'updateCost'])
     ->name('shippingplan.updateCost');
     Route::post('/shipping-plan/{id}/update-field', [ShippingPlanController::class, 'updateField']);
+    Route::post('/save-shipping-plan-data', [ShippingPlanController::class, 'saveShippingPlanData']);
+    Route::post('/update-shipping-plan-name/{id?}', [ShippingPlanController::class, 'updatePlanName'])->name('shipping.update.name');
 
 
 

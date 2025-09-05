@@ -35,7 +35,7 @@
                         @foreach ($shippingPlans as $shippingPlan )
                         <tr>
                             <td>
-                                <a class="" href="{{ url('shipping-plans/' . $shippingPlan->custom_id . '/edit') }}">{{ $shippingPlan->custom_id }}
+                                <a class="" href="{{ url('shipping-plans/' . $shippingPlan->custom_id . '/edit') }}">{{ $shippingPlan->custom_id }} {{ $shippingPlan->name ? ' - ' . $shippingPlan->name : '' }}
                                     <span>
                                       {{-- - {{ $shippingPlan->creator?->name ?? 'N/A' }}  --}}
                                       -

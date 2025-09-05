@@ -155,7 +155,9 @@
                         <select class="form-select" id="selectBuylist" required>
                             <option value="" disabled selected>Select a PrepOrder</option>
                             @foreach ($prepOrderAll as  $prepOrderItem)
-                                <option value="{{ $prepOrderItem->id }}">{{ $prepOrderItem->custom_id }}</option>                                
+                                <option value="{{ $prepOrderItem->id }}">{{ $prepOrderItem->custom_id }}
+                                -{{ $prepOrderItem->name }}    
+                                </option>                                
                             @endforeach
                             <!-- Dynamically populate options here -->
                         </select>

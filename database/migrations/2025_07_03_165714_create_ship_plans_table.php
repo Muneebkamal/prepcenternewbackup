@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('ship_plans', function (Blueprint $table) {
             $table->id();
             $table->string('custom_id')->unique();
+            $table->string('name')->nullable();
             $table->integer('employe_id')->nullable();
             $table->string('sku_method')->nullable();
             $table->string('market_place')->default('US');
@@ -29,6 +30,7 @@ return new class extends Migration
             $table->string('amazon_reference_id')->nullable();
             $table->string('ship_to')->nullable();
             $table->string('method_carrier')->nullable();
+            $table->boolean('is_pending')->default(0);
             $table->softDeletes(); // For soft delete functionality
             $table->timestamps();
         });
