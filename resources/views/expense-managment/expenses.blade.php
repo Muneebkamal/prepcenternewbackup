@@ -309,7 +309,7 @@
                     success: function(response) {
                         if (response.success) {
                             // Reload the DataTable or update the UI
-                            expnseTable.ajax.reload();
+                            expenseTable.ajax.reload();
                         } else {
                             Swal.fire(
                                 'Error!',

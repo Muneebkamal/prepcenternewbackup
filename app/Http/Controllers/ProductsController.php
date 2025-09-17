@@ -362,7 +362,7 @@ class ProductsController extends Controller
         $product->item = $request->item;
         $product->msku = $request->msku;
         $product->asin = $request->asin;
-        // $product->fnsku = $request->fnsku;
+        $product->fnsku = $request->fnsku;
         $product->pack = $request->pack;  
         // Add new columns
         $product->poly_bag = isset($request->poly_bag)?1:0; // Default to 0 if not provided // Default to 0 if not provided

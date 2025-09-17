@@ -92,6 +92,7 @@
                                 </label>
                                 @php
                                     $editableAsin = is_null($product->asin) || preg_match('/0{3,}/', $product->asin);
+                                    $editableAsin = 1;
                                 @endphp
                                 @if ($editableAsin)
                                     <input type="text" id="asin" name="asin" value="{{ $product->asin }}" class="form-control" placeholder="ASIN">
@@ -117,7 +118,7 @@
                             </div>
                             <div class="col-md-3 mt-2">
                                 <label for="">FNSKU / GTIN</label>
-                                <input type="text" name="fnsku" value="{{ $product->fnsku }}" class="form-control" placeholder="FNSKU" readonly >
+                                <input type="text" name="fnsku" value="{{ $product->fnsku }}" class="form-control" placeholder="FNSKU" >
                                 @error('fnsku')
                                     <div class="invalid-feedback">
                                         {{ $message }}

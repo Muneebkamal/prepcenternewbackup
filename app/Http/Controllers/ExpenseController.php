@@ -53,15 +53,14 @@ class ExpenseController extends Controller
                     >
                         Edit
                     </button>
-                    
+                    <button 
+                        class="btn btn-sm btn-danger delete-expense" 
+                        onclick="deleteExpnse(' . $expens->id . ')" 
+                        data-id="' . $expens->id . '"
+                    >
+                        Delete
+                    </button>
                 ';
-                // <button 
-                //         class="btn btn-sm btn-danger delete-expense" 
-                //         onclick="deleteExpense(' . $expens->id . ')" 
-                //         data-id="' . $expens->id . '"
-                //     >
-                //         Delete
-                //     </button>
             })            
             ->rawColumns(['category_id','actions'])
             ->make(true);

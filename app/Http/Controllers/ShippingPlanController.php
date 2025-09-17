@@ -2,16 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PackingTemplate;
 use App\Models\ShipPlan;
 use App\Models\ShipPlanDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class ShippingPlanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $shippingPlans = ShipPlan::where('is_pending',0)->get();
+        if ($request->ajax()) {
+            $query = ShipPlan::latest();
+            return DataTables::of($query)
+                ->addColumn('date', function ($row) {
+                    return $row->created_at->format('m/d/yy');
+                })
+                ->addColumn('amazon_id', function ($row) {
+                    return $row->amazon_id;
+                })
+                ->addColumn('no_of_sku', function ($row) {
+                    return $row->shippingDetails->count() ?? 0;
+                })
+                ->addColumn('total_units', function ($row) {
+                    return $row->shippingDetails->sum('units') ?? 0;
+                })
+                ->addColumn('total_boxes', function ($row) {
+                    return $row->shippingDetails->sum('boxes') ?? 0;
+                })
+                ->addColumn('total_weight', function ($row) {
+                    $totalWeight = 0;
+                    foreach($row->shippingDetails as $item){
+                        if($item->template_id){
+                            $findTemplate = PackingTemplate::where('id',$item->template_id)->first();
+                            if($findTemplate){
+                                $itemboxes = $item->boxes;
+                                $itemWeight = $itemboxes * $findTemplate->box_weight;
+                                $totalWeight += $itemWeight;
+                            }
+                        }
+                    }
+                    return $totalWeight;
+                })
+                ->addColumn('handling_cost', function ($row) {
+                    return '$'.number_format($row->handling_cost, 2);
+                })
+                ->addColumn('shipping_cost', function ($row) {
+                    return '$'.number_format($row->shipment_fee, 2);
+                })
+                ->addColumn('total_charge', function ($row) {
+                    $total = $row->handling_cost + $row->shipment_fee; // sum of both
+                    return '$' . number_format($total, 2);
+                })
+                ->addColumn('cost_per_unit', function ($row) {
+                    $total = $row->handling_cost + $row->shipment_fee; // recalc total
+                    $totalUnits = $row->shippingDetails->sum('units') ?? 0;
+                    return $totalUnits > 0 
+                        ? '$' . number_format($total / $totalUnits, 2) 
+                        : '0.00';
+                })
+                ->addColumn('cost_per_lb', function ($row) {
+                    $total = $row->handling_cost + $row->shipment_fee;
+
+                    // Recalculate weight here
+                    $totalWeight = 0;
+                    foreach ($row->shippingDetails as $item) {
+                        if ($item->template_id) {
+                            $findTemplate = PackingTemplate::where('id', $item->template_id)->first();
+                            if ($findTemplate) {
+                                $itemboxes = $item->boxes;
+                                $itemWeight = $itemboxes * $findTemplate->box_weight;
+                                $totalWeight += $itemWeight;
+                            }
+                        }
+                    }
+
+                    return $totalWeight > 0
+                        ? number_format($total / $totalWeight, 2)
+                        : '0.00';
+                })
+                ->addColumn('action', function ($row) {
+                    $editUrl = url('shipping-plans/' . $row->custom_id . '/edit');
+                    return '<a href="' . $editUrl . '" class="btn btn-sm btn-warning">Edit</a>';
+                })
+                ->rawColumns(['date', 'amazon_id', 'action'])
+                ->make(true);
+        }
         return view('shipping-plan.index',get_defined_vars());
     }
     public function create()
@@ -80,7 +157,7 @@ class ShippingPlanController extends Controller
     }
     public function Edit($id)
     {
-        $shippingPlan = ShipPlan::with('creator')->where('is_pending',0)->where('custom_id',$id)->first();
+        $shippingPlan = ShipPlan::with('creator')->where('custom_id',$id)->first();
         return view('shipping-plan.edit',get_defined_vars());
     }
     public function destroy($id)
@@ -193,6 +270,15 @@ class ShippingPlanController extends Controller
         $plan->name = $request->name;
         $plan->save();
         return response()->json(['success' => true, 'name' => $plan->name]);
+    }
+    public function updateName(Request $request, $id)
+    {
+        $plan = ShipPlan::findOrFail($id);
+        $plan->name = $request->name;
+        $plan->shipment_name = $request->shipment_name;
+        $plan->save();
+
+        return response()->json(['status' => true, 'message' => 'Updated successfully']);
     }
 
 }

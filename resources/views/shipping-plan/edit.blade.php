@@ -26,7 +26,7 @@
 
                 <!-- Hidden input -->
                 <input type="text" id="shipping-name-input" 
-                    class="form-control d-none" 
+                    class="form-control d-none sync-input" 
                     value="{{ $shippingPlan->name }}" 
                     style="max-width: 250px;">
                 <!-- Buttons -->
@@ -58,153 +58,23 @@
                     Delete
                 </button>
             @endif
-            <button type="button" class="btn btn-success" id="saveShippingPlan" onclick="saveShippingPlanData({{ $shippingPlan->id }})">
+            <button type="button" 
+                    class="btn btn-success" 
+                    onclick="saveShippingPlanData({{ $shippingPlan->id }}, false)">
                 Save
             </button>
-            </span>
+
+            <button type="button" 
+                    class="btn btn-primary" 
+                    onclick="saveShippingPlanData({{ $shippingPlan->id }}, true)">
+                Save & Close
+            </button>
         </div>
         <ul class="nav nav-tabs my-3">
           <li class="nav-item">
             <a class="nav-link active" href="#">All FBA SKUs</a>
           </li>
-          {{-- <li class="nav-item">
-            <a class="nav-link" href="#">SKUs ready to send (0)</a>
-          </li> --}}
         </ul>
-
-        {{-- <div class="row g-3">
-            <div class="col-md-2 d-none">
-                <label class="form-label d-block mb-2">SKU Selection Method</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="sku_method" value="list" id="skuList" {{ $shippingPlan->sku_method == 'list'?'checked':''  }} >
-                    <label class="form-check-label" for="skuList">Select from list</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="sku_method" {{ $shippingPlan->sku_method == 'file'?'checked':''  }} value="file" id="skuFile">
-                    <label class="form-check-label" for="skuFile">File upload</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Ship From</label>
-                    <span>Favorite Commodities Inc, 3320 LAWSON BLVD, OCEANSIDE, NY, 11572, US</span>
-                <a href="#" class="small">Ship from another address</a>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">Marketplace destination</label>
-                        <input type="text" class="form-control" value="United States" disabled>
-                        <input type="hidden" name="market_place" value="us">
-                    </div>
-                    <div class="col-md-6">
-                    <label class="form-label">Fulfillment capability</label>
-                        <select class="form-select" name="fullment_capability" id="fullment_capability">
-                        <option value="full_fillment" value="{{ $shippingPlan->full_fillment??'' }}">Standard Fulfillment by Amazon</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Shipment Name</label>
-                        <input type="text" class="form-control auto-save" name="shipment_name" 
-                            value="{{ $shippingPlan->shipment_name ?? '' }}" data-id="{{ $shippingPlan->id }}">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Amazon ID</label>
-                        <input type="text" class="form-control auto-save" name="amazon_id" 
-                            value="{{ $shippingPlan->amazon_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Amazon Reference ID</label>
-                        <input type="text" class="form-control auto-save" name="amazon_reference_id" 
-                            value="{{ $shippingPlan->amazon_reference_id ?? '' }}" data-id="{{ $shippingPlan->id }}">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Ship To</label>
-                        <input type="text" class="form-control auto-save" name="ship_to" 
-                            value="{{ $shippingPlan->ship_to ?? '' }}" data-id="{{ $shippingPlan->id }}">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Method & Carrier</label>
-                        <input type="text" class="form-control auto-save" name="method_carrier" 
-                            value="{{ $shippingPlan->method_carrier ?? '' }}" data-id="{{ $shippingPlan->id }}">
-                    </div>
-                </div>
-
-            </div>
-            <div class="col-md-6">
-                <table class="table table-bordered align-middle">
-                    <tbody>
-                        <tr>
-                            <td><strong>Total Units</strong></td>
-                            <td id="footerUnits">0</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Total Boxes</strong></td>
-                            <td id="footerBoxes">0</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Total Weight (lb)</strong></td>
-                            <td id="footerTotalWeight">0</td>
-                        </tr>
-                        
-                        <tr>
-                            <td><strong>Handling Fee</strong></td>
-                            <td>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" name="handling_fee" id="handlingFee" 
-                                        class="form-control" step="0.01" 
-                                        value="{{ number_format($shippingPlan->handling_cost, 2, '.', '') }}">
-                                </div>
-                                <div class="small text-muted">Per Item: <span id="perItemHandling">0.00</span></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Shipment Cost</strong></td>
-                            <td>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" id="shippingCost" name="shipment_cost" 
-                                        class="form-control" step="0.01" 
-                                        value="{{ number_format($shippingPlan->shipment_fee, 2, '.', '') }}">
-                                </div>
-                                <div class="small text-muted">Per Item: <span id="perItemShipping">0.00</span></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Total Charges</strong></td>
-                            <td><strong id="totalCost">0.00</strong> 
-                                
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Cost per Unit </strong></td>
-                            <td><strong id="totalPerItem">0.00</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Cost per Lb</strong></td>
-                            <td><strong id="costPerLb"><span id="totalPerItem">0.00</span></strong></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            
-            <div class="col-md-2 d-none">
-                 <label for="">Filter</label>
-                <div class="form-check ">
-                   
-                    <input class="form-check-input" type="checkbox" id="show_filter" name="show_filter" checked>
-                    <label class="form-check-label" for="casePack" {{ $shippingPlan->show_filter == 1?'checked':''  }}>
-                        Only show SKUs with case pack template
-                    </label>
-                </div>
-            </div>
-        </div> --}}
-
         <div class="row g-3">
             {{-- Row 1: Shipment Info --}}
             <div class="col-md-4">
@@ -213,7 +83,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label class="form-label">Shipment Name</label>
-                            <input type="text" id="shipment_name" class="form-control auto-save" name="shipment_name" 
+                            <input type="text" id="shipment_name" class="form-control auto-save sync-input" name="shipment_name" 
                                 value="{{ $shippingPlan->shipment_name ?? '' }}" data-id="{{ $shippingPlan->id }}">
                         </div>
 
@@ -1755,7 +1625,7 @@ function exportShippingPlanExcel() {
             }
         });
     });
-    function saveShippingPlanData(id) {
+    function saveShippingPlanData(id, closeAfterSave = false) {
         // Collect values by ID
         let shipmentName     = $('#shipment_name').val();
         let amazonId         = $('#amazon_id').val();
@@ -1778,6 +1648,12 @@ function exportShippingPlanExcel() {
             success: function(response) {
                 toastr.success("Shipping plan saved successfully!");
                 console.log(response);
+                if (closeAfterSave) {
+                    // redirect to index
+                    window.location.href = "{{ url('/shipping-plans') }}";
+                } else {
+                    // just show a success message
+                }
             },
             error: function(xhr) {
                 console.error(xhr.responseText);
@@ -1818,6 +1694,37 @@ function exportShippingPlanExcel() {
                 $("#cancel-btn-name").click(); // reset UI
             }
         });
+    });
+    $(document).on('input', '.sync-input', function () {
+        let value = $(this).val();
+        let id = $(this).data('id');
+
+        // Sync both inputs
+        $('#shipping-name-input').val(value);
+        $('#shipment_name').val(value);
+
+        // Update text span
+        $('#shipping-name-text').text(value ? '- ' + value : '- Name');
+
+        // Auto-save to DB (debounced so it won’t spam server)
+        clearTimeout(window.saveTimer);
+        window.saveTimer = setTimeout(function () {
+            $.ajax({
+                url: "{{ url('/shipping-plans/update-name') }}/" + id,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    name: value,
+                    shipment_name: value
+                },
+                success: function (res) {
+                    console.log('Saved!', res);
+                },
+                error: function (err) {
+                    console.error('Save failed', err);
+                }
+            });
+        }, 500); // wait 0.5s after typing stops
     });
 
 </script>

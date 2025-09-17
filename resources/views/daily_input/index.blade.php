@@ -406,7 +406,7 @@
                                     <i class="ri-file-copy-line ms-2" style="cursor: pointer;" onclick="copyToClipboard('${detail.product.msku}')" title="Copy Msku"></i>
                                 </td>
                                 <td>
-                                    ${detail.product ? `<div class="truncate"> <a data-toggle="tooltip" title="${detail.product.item}" href="/products/show/${detail.product.id}/edit" target="_blank">${detail.product.item}</a></div` : '--'}
+                                    ${detail.product ? `<div class="truncate"> <a data-toggle="tooltip" title="${detail.product.item}" href="/products/${detail.product.id}/edit" target="_blank">${detail.product.item}</a></div` : '--'}
                                 </td>
                                 <td>${detail.pack || '--'}</td>
                                 <td>${detail.qty || '0'}</td>
@@ -529,15 +529,47 @@
     }
     $('#lastWeekBtn').on('click', function () {
         // Get last week (Mon–Sun style, or just -7 days)
-        let end = moment().subtract(1, 'days');  // yesterday
-        let start = moment().subtract(7, 'days'); // 7 days ago
+        // let end = moment().subtract(1, 'days');  // yesterday
+        // let start = moment().subtract(7, 'days'); // 7 days ago
 
-        // Format for your backend (same format you’re already using)
-        let formattedRange = start.format('YYYY-MM-DD') + '_' + end.format('YYYY-MM-DD');
+        // // Format for your backend (same format you’re already using)
+        // let formattedRange = start.format('YYYY-MM-DD') + '_' + end.format('YYYY-MM-DD');
 
-        // Set values
-        $('#date_range').val(formattedRange);
-        $('#reportrange span').text(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+        // // Set values
+        // $('#date_range').val(formattedRange);
+        // $('#reportrange span').text(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        var start = {!! json_encode($startDate) !!};
+        var end = {!! json_encode($endDate) !!};
+        start = moment(start, 'YYYY-MM-DD');
+        end = moment(end, 'YYYY-MM-DD');
+
+        // Dynamic start day (0 = Sunday, 1 = Monday, etc.)
+        var dynamicStartDayNumber = {!! json_encode($weekStart) !!};
+
+        // Today reference
+        var today = moment();
+
+        // Find this week’s start (shifted to your dynamic start day)
+        var startOfWeek = today.clone().startOf('week').add(dynamicStartDayNumber, 'days');
+
+        // If that start is in the future (e.g., today is before the custom start day),
+        // adjust backwards one week
+        if (startOfWeek.isAfter(today)) {
+            startOfWeek.subtract(7, 'days');
+        }
+
+        // This week’s end
+        var endOfWeek = startOfWeek.clone().add(6, 'days');
+
+        // Last week’s range
+        var startOfLastWeek = startOfWeek.clone().subtract(7, 'days');
+        var endOfLastWeek = endOfWeek.clone().subtract(7, 'days');
+
+        // ✅ Example: set into your input / UI
+        $('#date_range').val(startOfLastWeek.format('YYYY-MM-DD') + '_' + endOfLastWeek.format('YYYY-MM-DD'));
+        $('#reportrange span').text(
+            startOfLastWeek.format('MMMM D, YYYY') + ' - ' + endOfLastWeek.format('MMMM D, YYYY')
+        );
 
         // Submit form
         $('#search_form').submit();

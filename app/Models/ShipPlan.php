@@ -36,4 +36,8 @@ class ShipPlan extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+    public function shippingDetails()
+    {
+        return $this->hasMany(ShipPlanDetail::class, 'ship_plan_id');
+    }
 }

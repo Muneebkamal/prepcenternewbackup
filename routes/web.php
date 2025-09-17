@@ -106,6 +106,7 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::post('expenses/store', [ExpenseController::class, 'store'])->name('expneses.store');
+    Route::delete('expneses/destroy/{id?}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('list-category', [ExpenseController::class, 'categoriesList'])->name('categories.list');
     Route::get('categories', [ExpenseController::class, 'catIndex'])->name('categories.index');
     Route::post('categories/store', [ExpenseController::class, 'catStore'])->name('categories.store');
@@ -164,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/shipping-plan/{id}/update-field', [ShippingPlanController::class, 'updateField']);
     Route::post('/save-shipping-plan-data', [ShippingPlanController::class, 'saveShippingPlanData']);
     Route::post('/update-shipping-plan-name/{id?}', [ShippingPlanController::class, 'updatePlanName'])->name('shipping.update.name');
+    Route::post('/shipping-plans/update-name/{id}', [ShippingPlanController::class, 'updateName']);
 
 
 
