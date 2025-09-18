@@ -67,6 +67,105 @@ class ExpenseController extends Controller
         }
         return view('expense-managment.expenses');
     }
+    public function mainExpenses(Request $request)
+    {
+        $query = Expense::whereNotNull('next_recreate_date'); // or type = 'one-time' if you store it like that
+        return DataTables::of($query)
+        ->addColumn('name', function ($expens) {
+            return $expens->category ? $expens->category->name : 'N/A';
+        })
+        ->addColumn('starting_date', function ($expens) {
+            return $expens->starting_date 
+            ? Carbon::parse($expens->starting_date)->format('Y-m-d') 
+            : null;
+        })
+        ->addColumn('amount', function ($expens) {
+            return  '$'.$expens->amount;
+        })
+        ->addColumn('description', function ($expens) {
+            return $expens->description;
+        })
+        
+        ->addColumn('type', function ($expens) {
+            return ucfirst($expens->type); // Capitalize the type (optional)
+        })
+        ->addColumn('actions', function ($expens) {
+            return '
+                <button 
+                    class="btn btn-sm btn-info edit-expense" 
+                    data-id="' . $expens->id . '" 
+                    data-category-id="' . $expens->category_id . '" 
+                    data-name="' . addslashes($expens->category ? $expens->category->name : 'N/A') . '" 
+                    data-amount="' . $expens->amount . '" 
+                    data-starting-date="' . ($expens->starting_date ? Carbon::parse($expens->starting_date)->format('Y-m-d')  : '') . '" 
+                    data-type="' . $expens->type . '" 
+                    data-description="' . addslashes($expens->description) . '"
+                    onclick="editExpense(this)"
+                >
+                    Edit
+                </button>
+                <button 
+                    class="btn btn-sm btn-danger delete-expense" 
+                    onclick="deleteExpnse(' . $expens->id . ')" 
+                    data-id="' . $expens->id . '"
+                >
+                    Delete
+                </button>
+            ';
+        })            
+        ->rawColumns(['category_id','actions'])
+        ->make(true);
+    }
+
+    public function recurringExpenses(Request $request)
+    {
+        $query = Expense::whereNull('next_recreate_date'); // daily, weekly, monthly, yearly
+        return DataTables::of($query)
+        ->addColumn('name', function ($expens) {
+            return $expens->category ? $expens->category->name : 'N/A';
+        })
+        ->addColumn('starting_date', function ($expens) {
+            return $expens->starting_date 
+            ? Carbon::parse($expens->starting_date)->format('Y-m-d') 
+            : null;
+        })
+        ->addColumn('amount', function ($expens) {
+            return  '$'.$expens->amount;
+        })
+        ->addColumn('description', function ($expens) {
+            return $expens->description;
+        })
+        
+        ->addColumn('type', function ($expens) {
+            return ucfirst($expens->type); // Capitalize the type (optional)
+        })
+        ->addColumn('actions', function ($expens) {
+            return '
+                <button 
+                    class="btn btn-sm btn-info edit-expense" 
+                    data-id="' . $expens->id . '" 
+                    data-category-id="' . $expens->category_id . '" 
+                    data-name="' . addslashes($expens->category ? $expens->category->name : 'N/A') . '" 
+                    data-amount="' . $expens->amount . '" 
+                    data-starting-date="' . ($expens->starting_date ? Carbon::parse($expens->starting_date)->format('Y-m-d')  : '') . '" 
+                    data-type="' . $expens->type . '" 
+                    data-description="' . addslashes($expens->description) . '"
+                    onclick="editExpense(this)"
+                >
+                    Edit
+                </button>
+                <button 
+                    class="btn btn-sm btn-danger delete-expense" 
+                    onclick="deleteExpnse(' . $expens->id . ')" 
+                    data-id="' . $expens->id . '"
+                >
+                    Delete
+                </button>
+            ';
+        })            
+        ->rawColumns(['category_id','actions'])
+        ->make(true);
+    }
     public function catIndex(Request $request){
         if ($request->ajax()) {
             $categories = Category::query();

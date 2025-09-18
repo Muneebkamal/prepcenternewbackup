@@ -40,83 +40,84 @@
         </div>
     @endif
     
-     <div class="row mb-3">
-        <div class="col-md-8 d-flex justify-content-between align-items-center">
-            <form id="search_form" action="{{ route('daily-input.index') }}" method="GET" class="">
+    <div class="row mb-3">
+        <div class="col-md-10">
+            <form id="search_form" action="{{ route('daily-input.index') }}" method="GET">
                 @csrf
-                    <div class="row d-flex align-items-end">
-                        <div class="col-md-8 d-flex align-items-center">
-                            <div class="me-2">
-                                <label for="date-input">
-                                    Select Date Range:
-                                </label>
-                                <div id="reportrange" class="reportrange p-2" style="background-color: white; border: var(--vz-border-width) solid var(--vz-input-border-custom); border-radius: var(--vz-border-radius);">
-                                    <span></span>
-                                    <b class="caret"></b>
-                                </div>
-                                <input type="hidden" id="date_range" name="date_range" />  
+                <div class="row d-flex align-items-end">
+                    <!-- Date Range Large Width -->
+                    <div class="col-md-7 d-flex align-items-center">
+                        <div class="flex-grow-1 me-2">
+                            <label for="date-input" class="fw-bold">Select Date Range:</label>
+                            <div id="reportrange" 
+                                class="reportrange p-2" 
+                                style="background-color: white; border: var(--vz-border-width) solid var(--vz-input-border-custom); border-radius: var(--vz-border-radius); width: 100%;">
+                                <span></span>
+                                <b class="caret"></b>
                             </div>
-                            <div class="col-md-5">
-                                <div class="mt-4 d-flex">
-                                    <button type="submit" id="sub_btn" class="btn btn-primary me-2">Search</button>
-                                    <button type="button" class="btn btn-danger me-2" id="resetButton">Clear</button>
-                                    <button type="button" class="btn btn-secondary me-2 btn-sm" id="lastWeekBtn">Last Week</button>
-                                </div>
-                            </div>
+                            <input type="hidden" id="date_range" name="date_range" />  
                         </div>
-                        <div class="col-md-3">
-                            <div class="mt-3 ms-2">
-                                <input type="checkbox" id="productShowCheck" class="form-control-check" checked>
-                                <label for="productShowCheck">Show Product Record</label>
-                            </div>
+
+                        <!-- Buttons Small -->
+                        <div class="ms-2 d-flex ">
+                            <button type="submit" id="sub_btn" class="btn btn-sm btn-primary me-2 mt-4  ">Search</button>
+                            <button type="button" class="btn btn-sm btn-danger me-2 mt-4" id="resetButton">Clear</button>
+                            <button type="button" class="btn btn-sm btn-secondary me-2 mt-4" id="lastWeekBtn">Last Week</button>
                         </div>
                     </div>
+                    <!-- Checkbox Small -->
+                    <div class="col-md-3">
+                        <div class="ms-2 small">
+                            <input type="checkbox" id="productShowCheck" class="form-check-input" checked>
+                            <label for="productShowCheck" class="form-check-label">Show Product Record</label>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
-        <div class="col-md-4 text-end">
+        <!-- Add Button Normal -->
+        <div class="col-md-2 text-end">
             <div class="add-btn mt-4">
                 <a href="{{ route('daily-input.create') }}" class="btn btn-primary">Add Daily Input</a>
             </div>
         </div>
     </div>
     @php
-    use Carbon\Carbon;
-    // Initialize variables
-    $totalHours = 0;
-    $totalMinutes = 0;
-    $totalPaid = 0;
-    $totalQty = 0;
-    $totalPackingCost = 0;
-    $totalItemHour = 0;
-@endphp
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title">Totals Summary</h5>
-        <div class="row">
-            <div class="col-md-2">
-                <p><strong>Total Time:</strong> <span id="totalHours">0 H 0 m</span></p>
-            </div>
-            @if(Auth()->user()->role == 1)
-            <div class="col-md-2">
-                <p><strong>Total Paid:</strong> <span id="totalPaid">$0.00</span></p>
-            </div>
-            @endif
-            <div class="col-md-2">
-                <p><strong>Total Quantity:</strong> <span id="totalQty">0</span></p>
-            </div>
-            @if(Auth()->user()->role == 1)
-            <div class="col-md-2">
-                <p><strong>Packing Cost per Item:</strong> <span id="totalPackingCost">$0.000</span></p>
-            </div>
-            @endif
-            <div class="col-md-2">
-                <p><strong>Items per Hour:</strong> <span id="totalItemHour">0.00</span></p>
+        use Carbon\Carbon;
+        // Initialize variables
+        $totalHours = 0;
+        $totalMinutes = 0;
+        $totalPaid = 0;
+        $totalQty = 0;
+        $totalPackingCost = 0;
+        $totalItemHour = 0;
+    @endphp
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Totals Summary</h5>
+            <div class="row">
+                <div class="col-md-2">
+                    <p><strong>Total Time:</strong> <span id="totalHours">0 H 0 m</span></p>
+                </div>
+                @if(Auth()->user()->role == 1)
+                <div class="col-md-2">
+                    <p><strong>Total Paid:</strong> <span id="totalPaid">$0.00</span></p>
+                </div>
+                @endif
+                <div class="col-md-2">
+                    <p><strong>Total Quantity:</strong> <span id="totalQty">0</span></p>
+                </div>
+                @if(Auth()->user()->role == 1)
+                <div class="col-md-2">
+                    <p><strong>Packing Cost per Item:</strong> <span id="totalPackingCost">$0.000</span></p>
+                </div>
+                @endif
+                <div class="col-md-2">
+                    <p><strong>Items per Hour:</strong> <span id="totalItemHour">0.00</span></p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -214,7 +215,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="mt-4">
-                        <h4>Product Packing  <span id="filterLable">This Month</span> </h4>
+                        <h4>Product Packing  <span class="filterLable">This Month</span> </h4>
                         <div class="table-responsive">
                             <table id="product-record-table" class="table table-bordered table-striped">
                                 <thead>
@@ -238,6 +239,34 @@
             </div>
 
         </div>
+          <!--Employee end col-->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div>
+                        <h4>Grouped By Employee  <span class="filterLable">This Month</span> </h4>
+                        <div class="table-responsive">
+                            <table id="dailyinputEmployee" class="table table-striped align-middle" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center"><small>Employee Name</small></th>
+                                        <th class="text-center"><small>Rate</small></th>
+                                        <th class="text-center"><small>Total Time</small></th>
+                                        <th class="text-center w-5"><small>Total QTY</small></th>
+                                        @if(Auth()->user()->role == 1)
+                                            <th class="text-center w-10"><small>Total Paid</small></th>
+                                            <th class="text-center"><small>Total PC /Item</small></th>
+                                            <th class="text-center"><small>Total Item /Hour</small></th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end col-->
     </div><!--end row-->
     
     <!-- end page title -->
@@ -274,23 +303,6 @@
             $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
             $("#date_range").val(start.format('YYYY-M-D') + '_' + end.format('YYYY-M-D'));
         }
-
-        // $('#reportrange').daterangepicker({
-        //     startDate: start,
-        //     endDate: end,
-        //     ranges: {
-        //         'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-        //         'This Week': [startOfWeek, endOfWeek],
-        //         'Last Week': [startOfLastWeek, endOfLastWeek],
-        //         'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-        //         'This Month': [moment().startOf('month'), moment().endOf('month')],
-        //         'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-        //         'Last 3 Months': [moment().subtract(2, 'month').startOf('month'), moment().endOf('month')],
-        //         'Last 6 Months': [moment().subtract(5, 'month').startOf('month'), moment().endOf('month')],
-        //         'This Year': [moment().startOf('year'), moment().endOf('year')],
-        //         'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
-        //     }
-        // }, cb);
         $('#reportrange').daterangepicker({
             startDate: start,
             endDate: end,
@@ -307,9 +319,7 @@
                 'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
             }
         }, function(start, end, label) {
-            // Directly assign the label to the date_range input field
-            // $('#date_range').val(label);
-            $('#filterLable').text(label)
+            $('.filterLable').text(label)
             // Call your callback function (cb) if needed
             cb(start, end);
         });
@@ -318,16 +328,10 @@
     });
     var userRole = "{{ auth()->user()->role }}"; 
     $(document).ready(function() {
-        // $('#daily-input').DataTable({
-        //     "ordering": false
-        // });
-        // $('#sub_btn').click();
         if ($.fn.DataTable.isDataTable('#daily-input')) {
             $('#daily-input').DataTable().destroy();
         }
         var applyDateFilter = true; // Flag to control date range filter application
-        
-
         // Add these columns only if the user is an admin (role = 1)
         if (userRole == 1) {
             var columns = [
@@ -344,7 +348,7 @@
                 { data: 'total_item_hour', name: 'total_item_hour' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
        
-        ];
+            ];
         }else{
             var columns = [
                 { data: 'date', name: 'date' },
@@ -431,11 +435,45 @@
         $('#daily-input').on('length.dt', function(e, settings, len) {
             applyDateFilter = false; // Disable date range filter when length is changed
         });
+        var employeeColumns;
+        if (userRole == 1) {
+            employeeColumns = [
+                { data: 'employee_name', name: 'employee_name' },
+                { data: 'rate', name: 'rate' },
+                { data: 'total_hours', name: 'total_hours' },
+                { data: 'total_qty', name: 'total_qty' },
+                { data: 'total_paid', name: 'total_paid' },
+                { data: 'total_packing_cost', name: 'total_packing_cost' },
+                { data: 'total_item_hour', name: 'total_item_hour' }
+            ];
+        } else {
+            employeeColumns = [
+                { data: 'employee_name', name: 'employee_name' },
+                { data: 'total_hours', name: 'total_hours' },
+                { data: 'total_qty', name: 'total_qty' }
+            ];
+        }
+
+        var dailyinputEmployee = $('#dailyinputEmployee').DataTable({
+            processing: true,
+            serverSide: false, // grouped results are small
+            ajax: {
+                url: "{{ url('get-daily-input-employee') }}",
+                type: 'GET',
+                data: function(d) {
+                    d.date_range = $('#date_range').val();
+                }
+            },
+            columns: employeeColumns,
+            order: []
+        });
+
         $('#search_form').on('submit', function(e) {
             e.preventDefault();
             applyDateFilter = true;
             subscription_table.draw();
             applyDateFilter = false;
+            dailyinputEmployee.ajax.reload();   // grouped
         });
         // Reset the filters
         $('#resetButton').on('click', function() {

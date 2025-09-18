@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Option extends Model
 {
     use HasFactory;
-    protected $fillable = ['system_option_id', 'value', 'no_of_pcs_in_cotton', 'price_of_cotton'];
+    protected $fillable = ['system_option_id', 'value', 'no_of_pcs_in_cotton', 'price_of_cotton','supplier'];
     public function systemOption()
     {
         return $this->belongsTo(SystemOption::class, 'system_option_id');

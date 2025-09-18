@@ -56,14 +56,18 @@
                             </a>
                         </li>
                     @endif
-
-                    @if($user && in_array('employees', $permissions))
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ request()->is('employees') ? 'active' : '' }}" href="{{ route('employees.index') }}">
-                                <i class="mdi mdi-alarm-panel"></i> <span data-key="t-widgets">Employee</span>
-                            </a>
-                        </li>
+                    @if($user && in_array('prep_order', $permissions))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('prep-orders.index') ? 'active' : '' }}" href="{{ route('prep-orders.index') }}">
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Prep Work Order List</span>
+                        </a>
+                    </li>
                     @endif
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('shipping-plans') ? 'active' : '' }}" href="{{ route('shipping-plans.index') }}">
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Shipping Plan </span>
+                        </a>
+                    </li>
                     
                     @if($user && in_array('products', $permissions))
                         <li class="nav-item">
@@ -116,6 +120,13 @@
                             </a>
                         </li>
                     @endif
+                    @if($user && in_array('employees', $permissions))
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->is('employees') ? 'active' : '' }}" href="{{ route('employees.index') }}">
+                                <i class="mdi mdi-alarm-panel"></i> <span data-key="t-widgets">Employee</span>
+                            </a>
+                        </li>
+                    @endif
                     @if($user && in_array('merge_products', $permissions))
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->is('merge-products', 'merge-products') ? 'active' : '' }}" href="{{ route('merge.product.menu') }}">
@@ -124,13 +135,7 @@
                         </li>
                     @endif
                     <!--<li class="menu-title"><span data-key="t-menu">Prep Work Order</span></li>-->
-                    @if($user && in_array('prep_order', $permissions))
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('prep-orders.index') ? 'active' : '' }}" href="{{ route('prep-orders.index') }}">
-                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Prep Work Order List</span>
-                        </a>
-                    </li>
-                    @endif
+
                     {{-- <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('prep-orders-create') ? 'active' : '' }}" href="{{ route('prep-orders.create') }}">
                             <i class="las la-calendar"></i> <span data-key="t-widgets">Prep Work Orders</span>
@@ -173,11 +178,7 @@
                         </div>
                     </li>
                     @endif
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('shipping-plans') ? 'active' : '' }}" href="{{ route('shipping-plans.index') }}">
-                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Shipping Plan </span>
-                        </a>
-                    </li>
+                    
                         
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf

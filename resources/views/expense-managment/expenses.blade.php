@@ -28,29 +28,65 @@
     <div class="row">
         <div class="col-lg-12 p-0">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <h5 class="card-title mb-0">Expeneses</h5>
-                    <!-- Add Category Button -->
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addExpenseModal" id="addExpenseButton">
-                        Add Expense
-                    </button>
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="expenseTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="main-tab" data-bs-toggle="tab" href="#main-expenses" role="tab">Main Expenses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="recurring-tab" data-bs-toggle="tab" href="#recurring-expenses" role="tab">Recurring Expenses</a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="expnseTable" class="table table-striped align-middle" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Category</th>
-                                    <th>Start Date</th>
-                                    <th>Amount</th>
-                                    <th>Description</th>
-                                    <th>Repeat</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                <div class="card-body tab-content">
+                    <!-- Main Expenses Tab -->
+                  
+                    <div class="tab-pane fade show active" id="main-expenses" role="tabpanel">
+                       <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">Expenses</h5>
+                            <button type="button" 
+                                    class="btn btn-primary btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#addExpenseModal" 
+                                    id="addExpenseButton">
+                                <i class="bi bi-plus-lg"></i> Add Expense
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="expenseTableMain" class="table table-striped align-middle" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Category</th>
+                                        <th>Start Date</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Recurring Expenses Tab -->
+                    <div class="tab-pane fade" id="recurring-expenses" role="tabpanel">
+                        <div class="table-responsive">
+                            <table id="expenseTableRecurring" class="table table-striped align-middle" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Category</th>
+                                        <th>Start Date</th>
+                                        <th>Amount</th>
+                                        <th>Repeat</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -358,6 +394,39 @@
             },
         });
     }
+    $(document).ready(function () {
+        // Main Expenses (non-recurring)
+        $('#expenseTableMain').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route("expenses.main") }}', // backend route only for main expenses
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'name', name: 'name' },
+                { data: 'starting_date', name: 'starting_date' },
+                { data: 'amount', name: 'amount' },
+                { data: 'description', name: 'description' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            ]
+        });
+
+        // Recurring Expenses
+        $('#expenseTableRecurring').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route("expenses.recurring") }}', // backend route only for recurring
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'name', name: 'name' },
+                { data: 'starting_date', name: 'starting_date' },
+                { data: 'amount', name: 'amount' },
+                { data: 'type', name: 'type' }, // daily/weekly/monthly/yearly
+                { data: 'description', name: 'description' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            ]
+        });
+    });
+
 
 
 

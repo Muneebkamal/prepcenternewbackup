@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/getItemsWps', [ProductsController::class,'getItemsWps']);
     Route::post('/product-update-image/{id}', [ProductsController::class,'updateImage'])->name('product.update.image');
     Route::resource('daily-input', DailyInputController::class);
+    Route::get('get-daily-input-employee', [DailyInputController::class,'getDailyInputEmployeeData'])->name('grouped.by.employee');
     Route::get('daily-input-detail/{id?}', [DailyInputController::class,'edit2'])->name('daily-input.edit2');
     Route::get('/daily-inputs-current-month', [DailyInputController::class, 'fetchDailyInputs']);
     Route::post('/daily-input-detail', [DailyInputController::class, 'detailStore'])->name('daily.input.detail');
@@ -105,6 +106,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/temp-products/merge', [ProductsController::class, 'tempProductMerge'])->name('temp.products.merge');
     
     Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('expenses/main', [ExpenseController::class, 'mainExpenses'])->name('expenses.main');
+    Route::get('expenses/recrring', [ExpenseController::class, 'recurringExpenses'])->name('expenses.recurring');
     Route::post('expenses/store', [ExpenseController::class, 'store'])->name('expneses.store');
     Route::delete('expneses/destroy/{id?}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('list-category', [ExpenseController::class, 'categoriesList'])->name('categories.list');

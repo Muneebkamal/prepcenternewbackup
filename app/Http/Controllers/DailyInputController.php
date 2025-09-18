@@ -793,6 +793,73 @@ class DailyInputController extends Controller
             ->with('details', $details)
             ->make(true);
     }
+    public function getDailyInputEmployeeData(Request $request)
+    {
+        if (auth()->user()->role == 1 || auth()->user()->department == 4) {
+            $query = DailyInputs::query();
+        } else {
+            $query = DailyInputs::where('employee_id', auth()->user()->id);
+        }
+
+        $userIds = DB::table('users')->pluck('id');
+
+        // ✅ Join details for qty
+        $query->leftJoinSub(
+            DB::table('daily_input_details')
+            ->select('daily_input_id', DB::raw('COALESCE(SUM(qty), 0) as total_qty'))
+            ->whereNull('deleted_at')
+            ->groupBy('daily_input_id'),
+            'details_sum',
+            'daily_inputs.id',
+            'details_sum.daily_input_id'
+        )
+        ->with('user:id,name')
+        ->whereIn('daily_inputs.employee_id', $userIds);
+
+        // ✅ Date range filter
+        if ($dateRange = $request->get('date_range')) {
+            $dates = explode('_', $dateRange);
+            if (count($dates) == 2) {
+                $startDate = $dates[0];
+                $endDate = $dates[1];
+                $query->whereBetween('date', [$startDate, $endDate]);
+            }
+        }
+
+        // ✅ Aggregate by employee
+        $grouped = $query->selectRaw('
+            employee_id,
+            MAX(rate) as rate,     
+            SUM(total_time_in_sec) as total_seconds,
+            SUM(total_paid) as total_paid,
+            SUM(details_sum.total_qty) as total_qty,
+            SUM(total_packing_cost) as total_packing_cost,   -- 👈 now SUM
+            SUM(total_item_hour) as total_item_hour          -- 👈 now SUM
+        ')
+        ->groupBy('employee_id')
+        ->get();
+
+        // ✅ Format data for DataTables
+        $data = $grouped->map(function ($row) {
+            $hours = intdiv($row->total_seconds, 3600);
+            $minutes = intdiv($row->total_seconds % 3600, 60);
+
+            return [
+                'employee_name' => '<small class="text-center d-block">' . ($row->user->name ?? 'N/A') . '</small>',
+                'rate' => '<small class="text-center d-block">$' . number_format($row->rate ?? 0, 2) . '</small>',
+                'total_hours' => '<small class="text-center d-block">' . $hours . 'H ' . $minutes . 'm</small>',
+                'total_qty' => '<small class="text-center d-block">' . ($row->total_qty ?? 0) . '</small>',
+                'total_paid' => '<small class="text-center d-block">$' . ($row->total_paid ?? 0) . '</small>',
+                'total_packing_cost' => '<small class="text-center d-block">$' . number_format($row->total_packing_cost ?? 0, 3) . '</small>',
+                'total_item_hour' => '<small class="text-center d-block">' . number_format($row->total_item_hour ?? 0, 3) . '</small>',
+            ];
+
+        });
+
+        return DataTables::of($data)
+            ->rawColumns(['employee_name', 'rate','total_hours', 'total_qty', 'total_paid', 'total_packing_cost', 'total_item_hour'])
+            ->make(true);
+    }
     public function fetchItems(Request $request)
     {
        $search = trim($request->input('search'));

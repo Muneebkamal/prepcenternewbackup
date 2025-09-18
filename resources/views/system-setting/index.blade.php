@@ -200,10 +200,7 @@
                                                     > Temporary Products
                                                 </div>
                                                 <div>
-                                                    {{-- <a href="#" class="btn btn-primary d-none" id="merge-btn">Products Merge</a> --}}
-                                                    {{-- <a href="{{ route('import.products') }}" class="btn btn-primary me-2">Import Products</a>
-                                                    <a href="{{ route('import.table') }}" class="btn btn-primary me-2">Import</a>
-                                                    <a href="{{ route('products.create') }}" class="btn btn-primary">Add Product</a> --}}
+                                                   
                                                 </div>
                                             </div>
                                         </div>
@@ -259,11 +256,7 @@
                                             </table>
                                            
 
-                                            {{-- @if($user && in_array('merge_products', $permissions))
-                                                <div class="d-flex justify-content-end mt-2">
-                                                    <a href="#" class="btn btn-success d-none" id="merge-btn">Products Merge</a>
-                                                </div>
-                                            @endif --}}
+                                            
                                         </div>
                                     </div>
                                 </div>       
@@ -313,6 +306,10 @@
                                                                     <label for="">Cost per Case</label>
                                                                     <input type="number" id="price_of_cotton{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
                                                                 </div>
+                                                                <div class="ms-2">
+                                                                    <label for="">Supplier</label>
+                                                                    <input type="text" id="Supplier{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     @elseif ($label->type == 'carton_size')
@@ -334,6 +331,10 @@
                                                                     <label for="">Cost per bundle</label>
                                                                     <input type="number" id="price_of_cotton{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
                                                                 </div>
+                                                                <div class="ms-2">
+                                                                    <label for="">Supplier</label>
+                                                                    <input type="text" id="Supplier{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     @elseif($label->type == 'shrink_wrap_size')
@@ -351,6 +352,10 @@
                                                             <div class="ms-2">
                                                                 <label for="">Cost per Case</label>
                                                                 <input type="number" id="price_of_cotton{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
+                                                            </div>
+                                                            <div class="ms-2">
+                                                                <label for="">Supplier</label>
+                                                                <input type="text" id="Supplier{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
                                                             </div>
                                                        </div>
                                                     </div>
@@ -370,6 +375,10 @@
                                                                 <label for="">Cost for Bubble Wrap Roll</label>
                                                                 <input type="number" id="price_of_cotton{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
                                                             </div>
+                                                            <div class="ms-2">
+                                                                <label for="">Supplier</label>
+                                                                <input type="text" id="Supplier{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
+                                                            </div>
                                                        </div>
                                                     </div>
                                                     @else
@@ -384,6 +393,10 @@
                                                             <div class="ms-2">
                                                                 <label for="">Cost per Roll</label>
                                                                 <input type="number" id="price_of_cotton{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
+                                                            </div>
+                                                            <div class="ms-2">
+                                                                <label for="">Supplier</label>
+                                                                <input type="text" id="Supplier{{ $label->id }}" class="form-control" style="width: 120px;" placeholder="">
                                                             </div>
                                                        </div>
                                                     @endif
@@ -629,6 +642,7 @@
         let weight = $(`#weight${labelId}`).val()?.trim() || '';
         let no_of_pcs_in_cotton = $(`#no_of_pcs${labelId}`).val()?.trim() || '';
         let price_of_cotton = $(`#price_of_cotton${labelId}`).val()?.trim() || '';
+        let supplier = $(`#Supplier${labelId}`).val()?.trim() || '';
 
         // Construct value based on labelType
         if (labelType === 'poly_bag_size') {
@@ -678,6 +692,7 @@
                 new_option: value,
                 no_of_pcs_in_cotton: no_of_pcs_in_cotton,
                 price_of_cotton: price_of_cotton,
+                supplier:supplier,
                 _token: $('meta[name="csrf-token"]').attr('content'),
             },
             success: function (response) {
@@ -712,6 +727,7 @@
         const no_of_pcs = $(this).data('no-of-pcs');
         const price_of_cotton = $(this).data('price-cotton');
         const labelType = $(this).data('label-type'); // Get the current option value
+        const labelsupplier = $(this).data('label-supplier'); // Get the current option value
 
         // console.log('current option:' + currentOption);
         // Split currentOption if it's a size-related field (height x width)
@@ -733,7 +749,7 @@
 
         
         // Append the inputs based on the label type and current option values
-        appendInputs(labelType, optionId, height, width, weight, no_of_pcs, price_of_cotton);
+        appendInputs(labelType, optionId, height, width, weight, no_of_pcs, price_of_cotton,labelsupplier);
         // Store the labelId and optionId in data attributes of the save button
         $('#saveEditedOption').data('label-id', labelId).data('option-id', optionId).data('label-type',labelType);
         // Show the modal
@@ -748,6 +764,7 @@
         let value = '';
         let no_of_pcs_in_cotton = '';
         let price_of_cotton = '';
+        var supplierVal = document.getElementById(`supplier${optionId}`).value;
 
         if (labelType === 'poly_bag_size' || labelType === 'shrink_wrap_size' || labelType === 'bubble_wrap') {
             const height = document.getElementById(`heightoption${optionId}`).value;
@@ -791,6 +808,7 @@
                 updated_option: updatedOption,
                 no_of_pcs_in_cotton: no_of_pcs_in_cotton,
                 price_of_cotton: price_of_cotton,
+                supplierVal:supplierVal,
                 _token: $('meta[name="csrf-token"]').attr('content'), // CSRF token
             },
             success: function (response) {
@@ -856,7 +874,7 @@
             }
         });
     });
-    function appendInputs(labelType, id, height, width, weight, no_of_pcs, price_of_cotton) {
+    function appendInputs(labelType, id, height, width, weight, no_of_pcs, price_of_cotton,labelsupplier) {
         // console.log(labelType);
         // Target container to append inputs
         const targetContainer = $(`#editOptionModalBody`);
@@ -882,6 +900,10 @@
                             <label for="">Cost Per Case</label>
                             <input type="number" id="price_of_cotton${id}" class="form-control" style="width: 120px;" placeholder="" value="${price_of_cotton}">
                         </div>
+                        <div class="ms-2">
+                            <label for="">Supplier</label>
+                            <input type="text" id="supplier${id}" class="form-control" style="width: 120px;" placeholder="" value="${labelsupplier}">
+                        </div>
                     </div>
                 </div>
             `;
@@ -905,6 +927,10 @@
                             <label for="">Cost per bundle</label>
                             <input type="number" id="price_of_cotton${id}" class="form-control" style="width: 120px;" placeholder="" value="${price_of_cotton}">
                         </div>
+                        <div class="ms-2">
+                            <label for="">Supplier</label>
+                            <input type="text" id="supplier${id}" class="form-control" style="width: 120px;" placeholder="" value="${labelsupplier}">
+                        </div>
                     </div>
                 </div>
             `;
@@ -925,6 +951,10 @@
                         <div class="ms-2">
                             <label for="">Cost per Case</label>
                             <input type="number" id="price_of_cotton${id}" class="form-control" style="width: 120px;" placeholder="" value="${price_of_cotton}">
+                        </div>
+                        <div class="ms-2">
+                            <label for="">Supplier</label>
+                            <input type="text" id="supplier${id}" class="form-control" style="width: 120px;" placeholder="" value="${labelsupplier}">
                         </div>
                     </div>
                 </div>
@@ -947,6 +977,10 @@
                             <label for="">Cost for Bubble Wrap Roll</label>
                             <input type="number" id="price_of_cotton${id}" class="form-control" style="width: 120px;" placeholder="" value="${price_of_cotton}">
                         </div>
+                        <div class="ms-2">
+                            <label for="">Supplier</label>
+                            <input type="text" id="supplier${id}" class="form-control" style="width: 120px;" placeholder="" value="${labelsupplier}">
+                        </div>
                     </div>
                 </div>
             `;
@@ -964,6 +998,10 @@
                         <label for="">Cost Per Roll</label>
                         <input type="number" id="price_of_cotton${id}" class="form-control" style="width: 120px;" placeholder="" value="${price_of_cotton}">
                     </div>
+                    <div class="ms-2">
+                         <label for="">Supplier</label>
+                        <input type="text" id="supplier${id}" class="form-control" style="width: 120px;" placeholder="" value="${labelsupplier}">
+                    </div>
                 </div>
             `;
         }
@@ -971,54 +1009,6 @@
         // Append the generated input fields to the container
         targetContainer.append(inputFields);
     }
-    // function appendOptions(labelId, newOptions) {
-    //     let optionsList = $(`#optionsTableBody${labelId}`);
-    //     // Clear the existing list (optional, if you don't want duplicates)
-    //     optionsList.empty();
-    //     newOptions = sortOptionsByNumericValues(newOptions)
-    //     // Append each new option
-    //     newOptions.forEach(function (option) {
-    //         var optionsType='';
-
-    //         if(labelId == 1){
-    //             var optionsType = 'poly_bag_size';
-    //         }else if(labelId == 2){
-    //             var optionsType = 'carton_size';
-    //         }else if(labelId == 6){
-    //             var optionsType = 'shrink_wrap_size';
-    //         }else if(labelId == 7){
-    //             var optionsType = 'label_1';
-    //         }
-    //         var prce = '';
-    //         if (option.no_of_pcs_in_cotton !== null && option.no_of_pcs_in_cotton !== 0 &&
-    //             option.price_of_cotton !== null && option.price_of_cotton !== 0) {
-    //                 prce =  `x ${option.no_of_pcs_in_cotton}" x ${option.price_of_cotton}"`
-    //         }
-    //         let optionItem = `
-    //             <tr id="option${labelId}_${option.id}">
-    //                 <td><strong>${option.value}</strong></td>
-    //                 <td>${option.no_of_pcs_in_cotton || '-'}</td>
-    //                 <td>${option.price_of_cotton || '-'}</td>
-    //                 <td>
-    //                     <button type="button" class="btn btn-primary btn-sm editOption"
-    //                         data-label-id="${labelId}"
-    //                         data-option-id="${option.id}"
-    //                         data-no-of-pcs="${option.no_of_pcs_in_cotton}"
-    //                         data-price-cotton="${option.price_of_cotton}"
-    //                         data-option="${option.value.replace(/"/g, '')}"
-    //                         data-label-type="${optionsType}">
-    //                         <i class="ri-pencil-fill"></i>
-    //                     </button>
-    //                     <button type="button" class="btn btn-danger btn-sm deleteOption"
-    //                         data-label-id="${labelId}"
-    //                         data-option-id="${option.id}">
-    //                         <i class="ri-chat-delete-fill"></i>
-    //                     </button>
-    //                 </td>
-    //             </tr>`;
-    //         optionsList.append(optionItem);
-    //     });
-    // }
     function appendOptions(labelId, newOptions) {
         let tableId = `#optionsTable${labelId}`;
         let tableBody = $(`#optionsTableBody${labelId}`);
@@ -1036,6 +1026,7 @@
                 <th class="text-center">polybags per Case</th>
                 <th class="text-center">Cost per Case</th>
                 <th class="text-center">Cost per polybag</th>
+                <th class="text-center">Supplier</th>
                 <th>Actions</th>
             </tr>`;
            
@@ -1045,6 +1036,7 @@
                 <th class="text-center">No of Carton in Bundle</th>
                 <th class="text-center">Cost per bundle</th>
                 <th class="text-center">Cost per Carton</th>
+                <th class="text-center">Supplier</th>
                 <th>Actions</th>
             </tr>`;
         }else if(labelId == 6){
@@ -1053,6 +1045,7 @@
                 <th class="text-center">Shrinkbag per Case</th>
                 <th class="text-center">Cost per Case</th>
                 <th class="text-center">Cost per shrinkbag</th>
+                <th class="text-center">Supplier</th>
                 <th>Actions</th>
             </tr>`;
         }else if(labelId == 8){
@@ -1061,6 +1054,7 @@
                 <th class="text-center">Feets per  Roll</th>
                 <th class="text-center">Cost of Bubble wrap Roll</th>
                 <th class="text-center">Cost per feet</th>
+                <th class="text-center">Supplier</th>
                 <th>Actions</th>
             </tr>`;
         }else{
@@ -1069,6 +1063,7 @@
                 <th class="text-center">Label in a Roll</th>
                 <th class="text-center">Cost per Roll</th>
                 <th class="text-center">Cost per label</th>
+                <th class="text-center">Supplier</th>
                 <th>Actions</th>
             </tr>`;
         }
@@ -1108,9 +1103,11 @@
                         ? (option.price_of_cotton / option.no_of_pcs_in_cotton)
                         : 0).toFixed(2)}</div>
                     </td>
+                    <td class="text-center">${option.supplier??'-'}</td>
                     <td>
                         <button type="button" class="btn btn-primary btn-sm editOption"
                             data-label-id="${labelId}"
+                            data-label-supplier="${option.supplier}"
                             data-option-id="${option.id}"
                             data-no-of-pcs="${option.no_of_pcs_in_cotton}"
                             data-price-cotton="${option.price_of_cotton}"

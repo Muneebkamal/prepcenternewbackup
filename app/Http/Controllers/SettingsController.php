@@ -19,7 +19,8 @@ class SettingsController extends Controller
             'system_option_id' => $request->label_id,
             'value' => $request->new_option,
             'no_of_pcs_in_cotton' => $request->no_of_pcs_in_cotton ?? 0,
-            'price_of_cotton' => $request->price_of_cotton ?? 0
+            'price_of_cotton' => $request->price_of_cotton ?? 0,
+            'supplier' => $request->supplier ?? null
         ]);
     
         return response()->json(['success' => true, 'option' => $option]);
@@ -69,6 +70,7 @@ class SettingsController extends Controller
         $option->value = $request->updated_option;
         $option->no_of_pcs_in_cotton = $request->no_of_pcs_in_cotton;
         $option->price_of_cotton = $request->price_of_cotton;
+        $option->supplier = $request->supplierVal??null;
         $option->save();
 
         return response()->json(['success' => true, 'message' => 'Option updated successfully.']);
